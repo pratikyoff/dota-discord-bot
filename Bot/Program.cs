@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Sockets;
 
 namespace Bot
 {
@@ -6,7 +7,12 @@ namespace Bot
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            TcpClient tcpClient = new TcpClient();
+            TcpClientCache.Cache = tcpClient;
+
+            string gatewayUrl = Gateway.GetUrl();
+            Console.WriteLine(gatewayUrl);
+            Console.ReadKey(true);
         }
     }
 }
