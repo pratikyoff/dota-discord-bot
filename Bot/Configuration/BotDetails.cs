@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bot.Configuration
+﻿namespace Bot.Configuration
 {
     public static class BotDetails
     {
