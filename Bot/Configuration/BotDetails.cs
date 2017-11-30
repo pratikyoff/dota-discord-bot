@@ -1,4 +1,4 @@
-﻿namespace Bot.Configuration
+﻿namespace Bot
 {
     public static class BotDetails
     {
@@ -7,5 +7,6 @@
         public static string ClientSecret { get => "H8Ny3LX0VI24vjo_EL2_u85YCYAYFVBl"; }
         public static string Username { get => "dota-stalker-bot#3927"; }
         public static string Token { get => "MzU2NzI3NDYxMzg1NjAxMDI1.DQHGzw.Py7sGQmYgucEq9oCWGnefUQBnRQ"; }
+        public static string ApiUrl { get => "https://discordapp.com/api/"; }
     }
 }
