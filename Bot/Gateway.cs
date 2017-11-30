@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Bot
 {
@@ -18,8 +19,8 @@ namespace Bot
                 byte[] buffer = new byte[response.ContentLength];
                 response.GetResponseStream().Read(buffer, 0, buffer.Length);
                 string bufferString = Encoding.ASCII.GetString(buffer);
-
-                return bufferString;
+                dynamic obj = JsonConvert.DeserializeObject(bufferString);
+                return obj.url;
             }
             else
                 return KeyValueCache.Get(_cacheUrlEntry);
