@@ -1,4 +1,5 @@
-﻿using Bot.Contracts;
+﻿using Bot.Configuration;
+using Bot.Contracts;
 using Bot.Implementations;
 using DSharpPlus;
 using Newtonsoft.Json;
@@ -46,7 +47,8 @@ namespace Bot
                 {
                     logger.Log(JsonConvert.SerializeObject(x.Message));
                     string command = GetFirstWord(x.Message.Content);
-
+                    var reply = CommandConfiguration.Get[command].Process(x.Message);
+                    await x.Message.RespondAsync(reply);
                 }
             };
         }
