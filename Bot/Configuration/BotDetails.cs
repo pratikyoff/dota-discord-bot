@@ -8,5 +8,6 @@
         public static string Username { get => "dota-stalker-bot#3927"; }
         public static string Token { get => "MzU2NzI3NDYxMzg1NjAxMDI1.DQHGzw.Py7sGQmYgucEq9oCWGnefUQBnRQ"; }
         public static string ApiUrl { get => "https://discordapp.com/api/"; }
+        public static string CommandPrefix { get => "!"; }
     }
 }
