@@ -1,6 +1,5 @@
 ﻿using Bot.Contracts;
 using DSharpPlus.Entities;
-using System;
 
 namespace Bot.Configuration
 {

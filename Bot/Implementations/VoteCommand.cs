@@ -1,5 +1,6 @@
-﻿using Bot.Contracts;
-using System;
+﻿using Bot.Configuration;
+using Bot.Contracts;
+using Bot.Models;
 using DSharpPlus.Entities;
 
 namespace Bot.Implementations
@@ -8,7 +9,9 @@ namespace Bot.Implementations
     {
         public string Process(DiscordMessage message)
         {
-            throw new NotImplementedException();
+            string nonCommand = message.Content.Substring(CommandConfiguration.VoteCommandString.Length + 2);
+            
+            return nonCommand;
         }
     }
 }
