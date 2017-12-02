@@ -2,6 +2,7 @@
 using Bot.Contracts;
 using Bot.Implementations;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
@@ -40,6 +41,8 @@ namespace Bot
 
             await Discord.ConnectAsync();
             logger.Log("Discord Connected");
+
+            await Discord.UpdateStatusAsync(new DiscordGame("!doc"));
 
             Discord.MessageCreated += async x =>
             {
