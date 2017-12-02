@@ -8,10 +8,13 @@ namespace Bot.Configuration
 {
     public static class CommandConfiguration
     {
+        private static VoteCommand _voteCommand = new VoteCommand();
+        private static PingCommand _pingCommand = new PingCommand();
+
         public static Dictionary<string, ICommand> Get = new Dictionary<string, ICommand>()
         {
-            { "vote", new VoteCommand() },
-            { "ping", new PingCommand() }
+            { "vote", _voteCommand },
+            { "ping", _pingCommand }
         };
     }
 }

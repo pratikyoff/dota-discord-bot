@@ -8,9 +8,7 @@ namespace Bot.Configuration
     {
         public string Process(DiscordMessage message)
         {
-            var timestamp = message.CreationTimestamp.DateTime;
-            var difference = DateTime.UtcNow - timestamp;
-            return difference.TotalMilliseconds + "ms";
+            return Program.Discord.Ping + "ms";
         }
     }
 }

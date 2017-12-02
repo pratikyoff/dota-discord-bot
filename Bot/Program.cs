@@ -10,7 +10,7 @@ namespace Bot
 {
     class Program
     {
-        static DiscordClient discord;
+        public static DiscordClient Discord { get; private set; }
         static ILogger logger;
 
         static void Main(string[] args)
@@ -26,28 +26,28 @@ namespace Bot
             AsyncMain();
 
             while (!quit) { }
-            discord.DisconnectAsync().GetAwaiter().GetResult();
-            discord.Dispose();
+            Discord.DisconnectAsync().GetAwaiter().GetResult();
+            Discord.Dispose();
         }
 
         private static async Task AsyncMain()
         {
-            discord = new DiscordClient(new DiscordConfiguration()
+            Discord = new DiscordClient(new DiscordConfiguration()
             {
                 Token = BotDetails.Token,
                 TokenType = TokenType.Bot
             });
 
-            await discord.ConnectAsync();
+            await Discord.ConnectAsync();
             logger.Log("Discord Connected");
 
-            discord.MessageCreated += async x =>
+            Discord.MessageCreated += async x =>
             {
                 if (x.Message.Content.IndexOf(BotDetails.CommandPrefix) == 0)
                 {
                     logger.Log(JsonConvert.SerializeObject(x.Message));
                     string command = GetFirstWord(x.Message.Content);
-                    var reply = CommandConfiguration.Get[command].Process(x.Message);
+                    string reply = CommandConfiguration.Get[command].Process(x.Message);
                     await x.Message.RespondAsync(reply);
                 }
             };
