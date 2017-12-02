@@ -21,14 +21,21 @@ namespace Bot.Implementations
             string[] words = nonCommand.Split(' ');
             int choice = 0;
             bool isChoice = int.TryParse(words[0], out choice);
+            if (StatusCommandCheck(words))
+                return GetVoteStatus();
             if (_vote.InProgress)
             {
                 if (isChoice)
                 {
+                    if (UserHasAlreadyVoted(message))
+                        return "You cannot vote twice.";
                     if (choice == 0) return "No choice exists.";
                     else
                     {
+                        if (choice > _vote.Options.Count || choice < 1)
+                            return "No such choice present.";
                         _vote.Options[choice].Votes++;
+                        _vote.UserVotedStore.Add(message.Author.Id.ToString());
                         return $"{message.Author.Mention} cast the vote as {_vote.Options[choice].Name}.";
                     }
                 }
@@ -64,9 +71,27 @@ namespace Bot.Implementations
                     }
                     _vote.InProgress = true;
                     TimeoutVote(message);
-                    return $"{_vote.Subject}\n{GetOptionsText(_vote.Options)}";
+                    return GetVoteStatus();
                 }
             }
+        }
+
+        private bool UserHasAlreadyVoted(DiscordMessage message)
+        {
+            return _vote.UserVotedStore.Contains(message.Author.Id.ToString());
+        }
+
+        private static string GetVoteStatus()
+        {
+            if (_vote.InProgress)
+                return $"{_vote.Subject}\n{GetOptionsText(_vote.Options)}";
+            else
+                return "No vote is in progress.";
+        }
+
+        private bool StatusCommandCheck(string[] words)
+        {
+            return words[0].ToLowerInvariant().Equals("status");
         }
 
         private static void TimeoutVote(DiscordMessage message)
@@ -74,12 +99,12 @@ namespace Bot.Implementations
             Task.Factory.StartNew(() =>
             {
                 Thread.Sleep(_vote.TimeoutSeconds * 1000);
-                message.RespondAsync("Vote has been time ended.").GetAwaiter().GetResult();
+                message.RespondAsync($"Vote has been time ended.\nHere are the final results.\n{GetVoteStatus()}").GetAwaiter().GetResult();
                 _vote = new Vote();
             });
         }
 
-        private object GetOptionsText(Dictionary<int, Option> options)
+        private static string GetOptionsText(Dictionary<int, Option> options)
         {
             string optionsText = string.Empty;
             foreach (var numberedOption in options)
