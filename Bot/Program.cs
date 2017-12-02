@@ -47,7 +47,15 @@ namespace Bot
                 {
                     logger.Log(JsonConvert.SerializeObject(x.Message));
                     string command = GetFirstWord(x.Message.Content);
-                    string reply = CommandConfiguration.Get[command].Process(x.Message);
+                    string reply = string.Empty;
+                    try
+                    {
+                        reply = CommandConfiguration.Get[command].Process(x.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        reply = e.Message;
+                    }
                     logger.Log(reply);
                     await x.Message.RespondAsync(reply);
                 }
