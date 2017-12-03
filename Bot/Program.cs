@@ -27,6 +27,10 @@ namespace Bot
             AsyncMain();
 
             while (!quit) { }
+            foreach (var functionality in FunctionalityConfiguration.Functionalities)
+            {
+                functionality.Stop();
+            }
             Discord.DisconnectAsync().GetAwaiter().GetResult();
             Discord.Dispose();
         }
@@ -42,7 +46,12 @@ namespace Bot
             await Discord.ConnectAsync();
             logger.Log("Discord Connected");
 
-            await Discord.UpdateStatusAsync(new DiscordGame("!doc"));
+            await Discord.UpdateStatusAsync(new DiscordGame(BotDetails.CommandPrefix + "doc"));
+
+            foreach (var functionality in FunctionalityConfiguration.Functionalities)
+            {
+                functionality.Start(Discord);
+            }
 
             Discord.MessageCreated += async x =>
             {
