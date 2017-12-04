@@ -9,6 +9,6 @@
         public static string Token { get => "MzU2NzI3NDYxMzg1NjAxMDI1.DQHGzw.Py7sGQmYgucEq9oCWGnefUQBnRQ"; }
         public static string ApiUrl { get => "https://discordapp.com/api/"; }
         public static string CommandPrefix { get => "!"; }
-        public static ulong BotTestingChannel { get => 386158934089662467; }
+        public static ulong BotFeedChannel { get => 387244251936849930; }
     }
 }
