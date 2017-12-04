@@ -19,7 +19,11 @@ namespace Bot
         {
             logger = new ConsoleLogger();
 
-            AsyncMain().ConfigureAwait(false).GetAwaiter().GetResult();
+            try
+            {
+                AsyncMain().ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            catch { }
 
             foreach (var functionality in FunctionalityConfiguration.Functionalities)
             {
