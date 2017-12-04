@@ -7,6 +7,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Threading;
 using DSharpPlus.Entities;
+using System.Linq;
 
 namespace Bot.Implementations
 {
@@ -33,15 +34,55 @@ namespace Bot.Implementations
                     {
                         int extraGames = currentMatches - player.TotalMatches;
                         player.TotalMatches = currentMatches;
-                        string suffix = extraGames > 1 ? "s" : "";
-                        string numberOfMatches = extraGames > 1 ? extraGames.ToString() : "a";
 
+                        var jsonString = GetResponseOfURL($"players/{player.SteamId}/matches?limit=1");
+                        dynamic lastMatch = ((dynamic)JsonConvert.DeserializeObject(jsonString))[0];
 
-
-                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> played {numberOfMatches} game{suffix}.").GetAwaiter().GetResult();
+                        string matchId = lastMatch.match_id;
+                        dynamic matchDetails;
+                        if (KeyValueCache.Get(matchId) == null)
+                        {
+                            string matchDetailsString = GetResponseOfURL($"matches/{matchId}");
+                            KeyValueCache.Put(matchId, matchDetailsString);
+                            matchDetails = JsonConvert.DeserializeObject(matchDetailsString);
+                        }
+                        else
+                        {
+                            matchDetails = JsonConvert.DeserializeObject(KeyValueCache.Get(matchId));
+                        }
+                        string winOrLose = FindPlayerGameResult(player, matchDetails);
+                        string hero = FindHero(lastMatch);
+                        string KDA = FindKDA(lastMatch);
+                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}").GetAwaiter().GetResult();
                     }
                 }
             }
+        }
+
+        private string FindHero(dynamic lastMatch)
+        {
+            return HeroDetails.HeroList.Where(x => x.id == (int)lastMatch.hero_id).First().localized_name;
+        }
+
+        private string FindKDA(dynamic lastMatch)
+        {
+            return $"{lastMatch.kills}/{lastMatch.deaths}/{lastMatch.assists}";
+        }
+
+        private string FindPlayerGameResult(Player player, dynamic matchDetails)
+        {
+            bool radiantWon = matchDetails.radiant_win;
+            bool isPlayerRadiant = false;
+            foreach (var gamePlayer in matchDetails.players)
+            {
+                if (gamePlayer.account_id != null && ((string)gamePlayer.account_id).Equals(player.SteamId))
+                {
+                    isPlayerRadiant = gamePlayer.isRadiant;
+                    break;
+                }
+            }
+            string result = radiantWon == isPlayerRadiant ? "won" : "lost";
+            return result;
         }
 
         private int GetTotalMatches(Player player)
@@ -52,11 +93,33 @@ namespace Bot.Implementations
 
         private int[] GetNumberOfWinsAndLosses(Player player)
         {
-            var response = httpClient.GetAsync($"players/{player.SteamId}/wl").GetAwaiter().GetResult();
-            var jsonString = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            dynamic responseInJson = JsonConvert.DeserializeObject(jsonString);
-            int[] winAndLose = new int[2] { responseInJson.win, responseInJson.lose };
-            return winAndLose;
+            string jsonString;
+            dynamic responseInJson;
+            bool isError = false;
+            do
+            {
+                try
+                {
+                    isError = false;
+                    jsonString = GetResponseOfURL($"players/{player.SteamId}/wl");
+                    responseInJson = JsonConvert.DeserializeObject(jsonString);
+                    int[] winAndLose = new int[2] { responseInJson.win, responseInJson.lose };
+                    return winAndLose;
+                }
+                catch (Exception)
+                {
+                    isError = true;
+                    Thread.Sleep(10 * 1000);
+                }
+            } while (isError);
+            return new int[] { 0, 0 };
+        }
+
+        private string GetResponseOfURL(string url)
+        {
+            var response = httpClient.GetAsync(url).GetAwaiter().GetResult();
+            var responseStream = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return responseStream;
         }
     }
 }

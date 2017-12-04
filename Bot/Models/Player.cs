@@ -10,5 +10,7 @@ namespace Bot.Models
         public string DiscordId { get; set; }
         public string SteamId { get; set; }
         public int TotalMatches { get; set; }
+        public int MatchesWon { get; set; }
+        public int MatchesLost { get; set; }
     }
 }
