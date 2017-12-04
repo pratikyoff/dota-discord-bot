@@ -17,7 +17,7 @@ namespace Bot.Implementations
         private DiscordChannel _botTestingChannel;
         public override void Run(DiscordClient discord)
         {
-            _botTestingChannel = discord.GetChannelAsync(BotDetails.BotTestingChannel).GetAwaiter().GetResult();
+            _botTestingChannel = discord.GetChannelAsync(BotDetails.BotFeedChannel).GetAwaiter().GetResult();
             var listOfPlayers = PlayerConfiguration.Players;
             httpClient.BaseAddress = new Uri(OpenDotaConfiguration.APIAddress);
             foreach (var player in listOfPlayers)
@@ -26,7 +26,7 @@ namespace Bot.Implementations
             }
             while (true)
             {
-                Thread.Sleep(10 * 60 * 1000);
+                Thread.Sleep(5 * 60 * 1000);
                 foreach (var player in listOfPlayers)
                 {
                     var currentMatches = GetTotalMatches(player);
