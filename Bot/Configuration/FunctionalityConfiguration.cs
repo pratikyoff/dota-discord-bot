@@ -9,9 +9,11 @@ namespace Bot.Configuration
     public static class FunctionalityConfiguration
     {
         private static Functionality _gametimeTracker = new GametimeTracker();
+        private static Functionality _dotaGameTracker = new DotaGameTracker();
         public static List<Functionality> Functionalities { get; set; } = new List<Functionality>()
         {
             _gametimeTracker,
+            _dotaGameTracker
         };
     }
 }
