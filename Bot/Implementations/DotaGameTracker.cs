@@ -18,14 +18,14 @@ namespace Bot.Implementations
         {
             _botTestingChannel = discord.GetChannelAsync(BotDetails.BotTestingChannel).GetAwaiter().GetResult();
             var listOfPlayers = PlayerConfiguration.Players;
-            httpClient.BaseAddress = new Uri("https://api.opendota.com/api/players/");
+            httpClient.BaseAddress = new Uri(OpenDotaConfiguration.APIAddress);
             foreach (var player in listOfPlayers)
             {
                 player.TotalMatches = GetTotalMatches(player);
             }
             while (true)
             {
-                Thread.Sleep(15 * 60 * 1000);
+                Thread.Sleep(10 * 60 * 1000);
                 foreach (var player in listOfPlayers)
                 {
                     var currentMatches = GetTotalMatches(player);
@@ -33,7 +33,12 @@ namespace Bot.Implementations
                     {
                         int extraGames = currentMatches - player.TotalMatches;
                         player.TotalMatches = currentMatches;
-                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> played {extraGames} game{extraGames > 1:\"s\":\"\"}.").GetAwaiter().GetResult();
+                        string suffix = extraGames > 1 ? "s" : "";
+                        string numberOfMatches = extraGames > 1 ? extraGames.ToString() : "a";
+
+
+
+                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> played {numberOfMatches} game{suffix}.").GetAwaiter().GetResult();
                     }
                 }
             }
@@ -47,7 +52,7 @@ namespace Bot.Implementations
 
         private int[] GetNumberOfWinsAndLosses(Player player)
         {
-            var response = httpClient.GetAsync($"{player.SteamId}/wl").GetAwaiter().GetResult();
+            var response = httpClient.GetAsync($"players/{player.SteamId}/wl").GetAwaiter().GetResult();
             var jsonString = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
             dynamic responseInJson = JsonConvert.DeserializeObject(jsonString);
             int[] winAndLose = new int[2] { responseInJson.win, responseInJson.lose };

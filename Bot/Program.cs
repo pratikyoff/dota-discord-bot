@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Newtonsoft.Json;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bot
@@ -16,17 +17,10 @@ namespace Bot
 
         static void Main(string[] args)
         {
-            bool quit = false;
-            Console.CancelKeyPress += (x, y) =>
-            {
-                quit = true;
-            };
-
             logger = new ConsoleLogger();
 
-            AsyncMain();
+            AsyncMain().ConfigureAwait(false).GetAwaiter().GetResult();
 
-            while (!quit) { }
             foreach (var functionality in FunctionalityConfiguration.Functionalities)
             {
                 functionality.Stop();
@@ -37,6 +31,13 @@ namespace Bot
 
         private static async Task AsyncMain()
         {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = cancellationTokenSource.Token;
+            Console.CancelKeyPress += (x, y) =>
+            {
+                cancellationTokenSource.Cancel();
+            };
+
             Discord = new DiscordClient(new DiscordConfiguration()
             {
                 Token = BotDetails.Token,
@@ -72,6 +73,7 @@ namespace Bot
                     await x.Message.RespondAsync(reply);
                 }
             };
+            await Task.Delay(-1, cancellationToken);
         }
 
         private static string GetFirstWord(string content)
