@@ -141,8 +141,8 @@ namespace Bot.Implementations
                 Thread.Sleep(_vote.TimeoutSeconds * 1000);
                 if (_vote.InProgress && _vote.Id.Equals(voteId))
                 {
-                    _vote = new Vote();
                     message.RespondAsync($"Vote has been time ended.\nHere are the final results.\n{GetVoteStatus()}").GetAwaiter().GetResult();
+                    _vote = new Vote();
                 }
             });
         }

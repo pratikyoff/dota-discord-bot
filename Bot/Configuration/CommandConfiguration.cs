@@ -1,5 +1,6 @@
 ﻿using Bot.Contracts;
 using Bot.Implementations;
+using System;
 using System.Collections.Generic;
 
 namespace Bot.Configuration
@@ -14,7 +15,7 @@ namespace Bot.Configuration
         private static PingCommand _pingCommand = new PingCommand();
         private static DocumentationCommand _docCommand = new DocumentationCommand();
 
-        public static Dictionary<string, ICommand> Get = new Dictionary<string, ICommand>()
+        public static Dictionary<string, ICommand> Get = new Dictionary<string, ICommand>(StringComparer.OrdinalIgnoreCase)
         {
             { VoteCommandString , _voteCommand },
             { PingCommandString , _pingCommand },
