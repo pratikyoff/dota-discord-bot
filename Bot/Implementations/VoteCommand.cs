@@ -19,10 +19,13 @@ namespace Bot.Implementations
                 return "What are you doing?";
             string nonCommand = message.Content.Substring(CommandConfiguration.VoteCommandString.Length + 2);
             string[] words = nonCommand.Split(' ');
-            int choice = 0;
-            bool isChoice = int.TryParse(words[0], out choice);
+            bool isChoice = int.TryParse(words[0], out int choice);
             if (StatusCommandCheck(words))
                 return GetVoteStatus();
+            if (EndCommandCheck(words))
+            {
+                return EndVote(message);
+            }
             if (_vote.InProgress)
             {
                 if (isChoice)
@@ -60,6 +63,8 @@ namespace Bot.Implementations
                     if (options.Count() < 2)
                         return "Atleast two options are needed for a vote to be created.";
                     _vote.Subject = string.Join(" ", words.Take(words.Length - 1));
+                    _vote.OwnerId = message.Author.Id;
+                    _vote.Id = Guid.NewGuid().ToString();
                     int i = 1;
                     foreach (var option in options)
                     {
@@ -70,10 +75,33 @@ namespace Bot.Implementations
                         };
                     }
                     _vote.InProgress = true;
-                    TimeoutVote(message);
+                    TimeoutVote(message, _vote.Id);
                     return GetVoteStatus();
                 }
             }
+        }
+
+        private string EndVote(DiscordMessage message)
+        {
+            if (_vote.InProgress)
+            {
+                if (_vote.OwnerId == message.Author.Id)
+                {
+                    string reply = $"Vote has been ended by {message.Author.Mention}.\nHere are the final results.\n{GetVoteStatus()}";
+                    _vote = new Vote();
+                    return reply;
+                }
+                else
+                    return $"Only the vote initiator (<@{_vote.OwnerId}>) can end the vote.";
+
+            }
+            else
+                return "No vote in progress.";
+        }
+
+        private bool EndCommandCheck(string[] words)
+        {
+            return words[0].ToLowerInvariant().Equals("end");
         }
 
         private bool UserHasAlreadyVoted(DiscordMessage message)
@@ -94,13 +122,16 @@ namespace Bot.Implementations
             return words[0].ToLowerInvariant().Equals("status");
         }
 
-        private static void TimeoutVote(DiscordMessage message)
+        private static void TimeoutVote(DiscordMessage message, string voteId)
         {
             Task.Factory.StartNew(() =>
             {
                 Thread.Sleep(_vote.TimeoutSeconds * 1000);
-                message.RespondAsync($"Vote has been time ended.\nHere are the final results.\n{GetVoteStatus()}").GetAwaiter().GetResult();
-                _vote = new Vote();
+                if (_vote.InProgress && _vote.Id.Equals(voteId))
+                {
+                    _vote = new Vote();
+                    message.RespondAsync($"Vote has been time ended.\nHere are the final results.\n{GetVoteStatus()}").GetAwaiter().GetResult();
+                }
             });
         }
 
