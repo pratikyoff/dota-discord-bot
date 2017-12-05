@@ -30,15 +30,27 @@ namespace Bot.Implementations
             {
                 if (isChoice)
                 {
-                    if (UserHasAlreadyVoted(message))
-                        return "You cannot vote twice.";
-                    if (choice == 0) return "No choice exists.";
+                    if (choice > _vote.Options.Count || choice < 1)
+                        return "No such choice present.";
+                    if (HasUserVoted(message))
+                    {
+                        if (choice == _vote.UserChoiceStore[message.Author.Id])
+                        {
+                            return "You voted twice for the same thing. Idiot.";
+                        }
+                        else
+                        {
+                            var prevVote = _vote.UserChoiceStore[message.Author.Id];
+                            _vote.Options[prevVote].Votes--;
+                            _vote.UserChoiceStore[message.Author.Id] = choice;
+                            _vote.Options[choice].Votes++;
+                            return $"{message.Author.Mention} cast the vote as {_vote.Options[choice].Name}.";
+                        }
+                    }
                     else
                     {
-                        if (choice > _vote.Options.Count || choice < 1)
-                            return "No such choice present.";
                         _vote.Options[choice].Votes++;
-                        _vote.UserVotedStore.Add(message.Author.Id.ToString());
+                        _vote.UserChoiceStore[message.Author.Id] = choice;
                         return $"{message.Author.Mention} cast the vote as {_vote.Options[choice].Name}.";
                     }
                 }
@@ -104,9 +116,9 @@ namespace Bot.Implementations
             return words[0].ToLowerInvariant().Equals("end");
         }
 
-        private bool UserHasAlreadyVoted(DiscordMessage message)
+        private bool HasUserVoted(DiscordMessage message)
         {
-            return _vote.UserVotedStore.Contains(message.Author.Id.ToString());
+            return _vote.UserChoiceStore.ContainsKey(message.Author.Id);
         }
 
         private static string GetVoteStatus()
