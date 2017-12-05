@@ -17,4 +17,15 @@ The main purpose of this bot is to post a message on your Discord group, wheneve
     !ping                                   Find the ping time between the bot and the Discord server
     !vote <Topic> <option1>|<option2>...    Start a poll with the given topic and options
     !vote <number>                          Vote for an existing poll with the option corresponding to the number
+    !vote status                            Display the status of an the existing poll
     !vote end                               End an existing poll
+
+## Iterative Development
+
+Make your changes, commit them, and push them to the remote. Next, on the server where the bot is running, stop the bot and run the redeploying script:
+
+```bash
+./redeploy.sh <branch-name>
+```
+
+where `<branch-name>` is the name of the branch you want to deploy. The script will automatically download the latest code from the remote, build your bot and run it.
