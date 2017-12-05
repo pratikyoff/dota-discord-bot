@@ -20,7 +20,7 @@ namespace Bot
 
         public static bool Put(string key, string value)
         {
-            if (Get(key) != null)
+            if (Get(key) == null)
             {
                 if (_keys.Count >= _limit)
                 {
