@@ -28,4 +28,4 @@ Make your changes, commit them, and push them to the remote. Next, on the server
 ./deploy.sh <branch-name>
 ```
 
-where `<branch-name>` is the name of the branch you want to deploy. The script will automatically download the latest code from the remote, build your bot and run it.
+where `<branch-name>` is the name of the branch you want to deploy. The script will automatically download the latest code from the remote, build your bot and run it. Make sure you have execute permissions to run this script.
