@@ -22,10 +22,10 @@ The main purpose of this bot is to post a message on your Discord group, wheneve
 
 ## Iterative Development
 
-Make your changes, commit them, and push them to the remote. Next, on the server where the bot is running, stop the bot and run the redeploying script:
+Make your changes, commit them, and push them to the remote. Next, on the server where the bot is running, stop the bot and run the deploying script:
 
 ```bash
-./redeploy.sh <branch-name>
+./deploy.sh <branch-name>
 ```
 
 where `<branch-name>` is the name of the branch you want to deploy. The script will automatically download the latest code from the remote, build your bot and run it.

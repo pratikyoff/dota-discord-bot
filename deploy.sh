@@ -4,7 +4,7 @@
 # This script is intended to be used only on a Linux machine.
 
 # Usage
-# $ ./redeploy.sh <branch-name>
+# $ ./deploy.sh <branch-name>
 
 # This is what happens, stepwise:
 # 1. Pull the latest code from the remote repo
