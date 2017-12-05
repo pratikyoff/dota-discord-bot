@@ -69,10 +69,7 @@ namespace Bot
                     {
                         reply = CommandConfiguration.Get[command].Process(x.Message);
                     }
-                    catch (Exception e)
-                    {
-                        reply = e.Message;
-                    }
+                    catch { }
                     logger.Log(reply);
                     await x.Message.RespondAsync(reply);
                 }
