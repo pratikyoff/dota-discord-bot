@@ -54,8 +54,7 @@ namespace Bot.Implementations
                         string hero = FindHero(lastMatch);
                         string KDA = FindKDA(lastMatch);
                         string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
-                        string OpenDotaLink = $"Opendota: {OpenDotaConfiguration.OpenDotaMatchUrl}{matchId}";
-                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n{DotabuffLink}\n{OpenDotaLink}").GetAwaiter().GetResult();
+                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n{DotabuffLink}").GetAwaiter().GetResult();
                     }
                 }
             }
