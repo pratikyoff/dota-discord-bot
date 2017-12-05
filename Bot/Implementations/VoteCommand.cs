@@ -36,7 +36,7 @@ namespace Bot.Implementations
                     {
                         if (choice == _vote.UserChoiceStore[message.Author.Id])
                         {
-                            return "You voted twice for the same thing. Idiot.";
+                            return "You have already voted for this choice.";
                         }
                         else
                         {
