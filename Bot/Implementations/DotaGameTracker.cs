@@ -19,7 +19,7 @@ namespace Bot.Implementations
         {
             _botTestingChannel = discord.GetChannelAsync(BotDetails.BotFeedChannel).GetAwaiter().GetResult();
             var listOfPlayers = PlayerConfiguration.Players;
-            httpClient.BaseAddress = new Uri(OpenDotaConfiguration.APIAddress);
+            httpClient.BaseAddress = new Uri(OpenDotaConfiguration.OpenDotaAPIAddress);
             foreach (var player in listOfPlayers)
             {
                 player.TotalMatches = GetTotalMatches(player);
@@ -53,7 +53,9 @@ namespace Bot.Implementations
                         string winOrLose = FindPlayerGameResult(player, matchDetails);
                         string hero = FindHero(lastMatch);
                         string KDA = FindKDA(lastMatch);
-                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}").GetAwaiter().GetResult();
+                        string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
+                        string OpenDotaLink = $"Opendota: {OpenDotaConfiguration.OpenDotaMatchUrl}{matchId}";
+                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n{DotabuffLink}\n{OpenDotaLink}").GetAwaiter().GetResult();
                     }
                 }
             }
