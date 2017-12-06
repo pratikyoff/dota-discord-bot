@@ -61,7 +61,7 @@ namespace Bot.Implementations
             {
                 foreach (var alias in timeUnit.Aliases)
                 {
-                    if (Regex.IsMatch(timerString, $@"^[0-9]+{alias}$"))
+                    if (Regex.IsMatch(timerString, $@"^[0-9]+(?i){alias}$"))
                     {
                         int time = int.Parse(Regex.Match(timerString, @"[0-9]+").Value);
                         return time * timeUnit.UnitTimeInSeconds;
