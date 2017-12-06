@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System.Threading;
 using DSharpPlus.Entities;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Bot.Implementations
 {
@@ -27,6 +28,7 @@ namespace Bot.Implementations
             while (true)
             {
                 Thread.Sleep(5 * 60 * 1000);
+                Dictionary<string, List<Player>> matchIdToPlayersMapping = new Dictionary<string, List<Player>>();
                 foreach (var player in listOfPlayers)
                 {
                     var currentMatches = GetTotalMatches(player);
@@ -37,40 +39,53 @@ namespace Bot.Implementations
 
                         var jsonString = GetResponseOfURL($"players/{player.SteamId}/matches?limit=1");
                         dynamic lastMatch = ((dynamic)JsonConvert.DeserializeObject(jsonString))[0];
-
                         string matchId = lastMatch.match_id;
-                        dynamic matchDetails;
-                        if (KeyValueCache.Get(matchId) == null)
+                        if (matchIdToPlayersMapping.ContainsKey(matchId))
                         {
-                            string matchDetailsString = GetResponseOfURL($"matches/{matchId}");
-                            KeyValueCache.Put(matchId, matchDetailsString);
-                            matchDetails = JsonConvert.DeserializeObject(matchDetailsString);
+                            matchIdToPlayersMapping[matchId].Add(player);
                         }
                         else
                         {
-                            matchDetails = JsonConvert.DeserializeObject(KeyValueCache.Get(matchId));
+                            matchIdToPlayersMapping[matchId] = new List<Player>() { player };
                         }
-                        string winOrLose = FindPlayerGameResult(player, matchDetails);
-                        string hero = FindHero(lastMatch);
-                        string KDA = FindKDA(lastMatch);
+                    }
+                    foreach (var matchId in matchIdToPlayersMapping.Keys)
+                    {
+                        string matchDetailsString = GetResponseOfURL($"matches/{matchId}");
+                        dynamic matchDetails = JsonConvert.DeserializeObject(matchDetailsString);
+                        string reply = string.Empty;
+                        foreach (var playerMatch in matchIdToPlayersMapping[matchId])
+                        {
+                            string winOrLose = FindPlayerGameResult(player, matchDetails);
+                            string hero = FindHero(player, matchDetails);
+                            string KDA = FindKDA(player, matchDetails);
+                            reply += $"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n";
+                        }
                         string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
-                        _botTestingChannel.SendMessageAsync($"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n{DotabuffLink}").GetAwaiter().GetResult();
+                        _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}").GetAwaiter().GetResult();
                     }
                 }
             }
         }
 
-        private string FindHero(dynamic lastMatch)
+        public string FindHero(Player player, dynamic matchDetails)
         {
-            return HeroDetails.HeroList.Where(x => x.id == (int)lastMatch.hero_id).First().localized_name;
+            dynamic playerMatchInfo = GetPlayerMatchInfo(player, matchDetails);
+            return HeroDetails.HeroList.Where(x => x.id == (int)playerMatchInfo.hero_id).First().localized_name;
         }
 
-        private string FindKDA(dynamic lastMatch)
+        private dynamic GetPlayerMatchInfo(Player player, dynamic matchDetails)
         {
-            return $"{lastMatch.kills}/{lastMatch.deaths}/{lastMatch.assists}";
+            return ((IEnumerable<dynamic>)matchDetails.players).Where(y => y.account_id == player.SteamId).First();
         }
 
-        private string FindPlayerGameResult(Player player, dynamic matchDetails)
+        public string FindKDA(Player player, dynamic matchDetails)
+        {
+            var playerMatchInfo = GetPlayerMatchInfo(player, matchDetails);
+            return $"{playerMatchInfo.kills}/{playerMatchInfo.deaths}/{playerMatchInfo.assists}";
+        }
+
+        public string FindPlayerGameResult(Player player, dynamic matchDetails)
         {
             bool radiantWon = matchDetails.radiant_win;
             bool isPlayerRadiant = false;
