@@ -14,9 +14,9 @@ namespace Bot.Configuration
 
         public static List<Functionality> Functionalities { get; set; } = new List<Functionality>()
         {
-            //_gametimeTracker,
+            _gametimeTracker,
             _dotaGameTracker,
-            //_userStatusTracker
+            _userStatusTracker
         };
     }
 }
