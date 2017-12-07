@@ -40,31 +40,28 @@ namespace Bot.Implementations
                         var jsonString = GetResponseOfURL($"players/{player.SteamId}/matches?limit=1");
                         dynamic lastMatch = ((dynamic)JsonConvert.DeserializeObject(jsonString))[0];
                         string matchId = lastMatch.match_id;
-                        if (matchIdToPlayersMapping.ContainsKey(matchId))
-                        {
-                            matchIdToPlayersMapping[matchId].Add(player);
-                        }
-                        else
-                        {
-                            matchIdToPlayersMapping[matchId] = new List<Player>() { player };
-                        }
-                    }
-                    foreach (var matchId in matchIdToPlayersMapping.Keys)
-                    {
-                        string matchDetailsString = GetResponseOfURL($"matches/{matchId}");
-                        dynamic matchDetails = JsonConvert.DeserializeObject(matchDetailsString);
-                        string reply = string.Empty;
-                        foreach (var playerMatch in matchIdToPlayersMapping[matchId])
-                        {
-                            string winOrLose = FindPlayerGameResult(player, matchDetails);
-                            string hero = FindHero(player, matchDetails);
-                            string KDA = FindKDA(player, matchDetails);
-                            reply += $"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n";
-                        }
-                        string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
-                        _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}").GetAwaiter().GetResult();
+                        if (!matchIdToPlayersMapping.ContainsKey(matchId))
+                            matchIdToPlayersMapping[matchId] = new List<Player>();
+
+                        matchIdToPlayersMapping[matchId].Add(player);
                     }
                 }
+                foreach (var matchId in matchIdToPlayersMapping.Keys)
+                {
+                    string matchDetailsString = GetResponseOfURL($"matches/{matchId}");
+                    dynamic matchDetails = JsonConvert.DeserializeObject(matchDetailsString);
+                    string reply = string.Empty;
+                    foreach (var player in matchIdToPlayersMapping[matchId])
+                    {
+                        string winOrLose = FindPlayerGameResult(player, matchDetails);
+                        string hero = FindHero(player, matchDetails);
+                        string KDA = FindKDA(player, matchDetails);
+                        reply += $"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n";
+                    }
+                    string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
+                    _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}").GetAwaiter().GetResult();
+                }
+
             }
         }
 
