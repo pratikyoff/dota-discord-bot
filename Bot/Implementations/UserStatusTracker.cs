@@ -22,6 +22,7 @@ namespace Bot.Implementations
             discord.PresenceUpdated += async x =>
             {
                 if (!memberStatus.ContainsKey(x.Member.Id)) return;
+                if (x.PresenceBefore.Status == x.Member.Presence.Status) return;
                 var timeDiff = DateTime.Now - memberStatus[x.Member.Id];
                 memberStatus[x.Member.Id] = DateTime.Now;
                 await channel.SendMessageAsync($"{x.Member.DisplayName} was {x.PresenceBefore.Status} for {GetTimeFormattedString(timeDiff)} and is now {x.Member.Presence.Status}.");
