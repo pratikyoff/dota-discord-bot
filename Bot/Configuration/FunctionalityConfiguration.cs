@@ -10,13 +10,13 @@ namespace Bot.Configuration
     {
         private static Functionality _gametimeTracker = new GametimeTracker();
         private static Functionality _dotaGameTracker = new DotaGameTracker();
-        //private static Functionality _userStatusTracker = new UserStatusTracker();
+        private static Functionality _userStatusTracker = new UserStatusTracker();
 
         public static List<Functionality> Functionalities { get; set; } = new List<Functionality>()
         {
             _gametimeTracker,
             _dotaGameTracker,
-            //_userStatusTracker
+            _userStatusTracker
         };
     }
 }

@@ -13,7 +13,7 @@ namespace Bot
     class Program
     {
         public static DiscordClient Discord { get; private set; }
-        static ILogger logger;
+        public static ILogger logger;
 
         static void Main(string[] args)
         {
