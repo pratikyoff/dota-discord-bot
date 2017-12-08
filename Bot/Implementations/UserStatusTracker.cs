@@ -5,9 +5,6 @@ using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Bot.Configuration;
 using System.Linq;
-using DSharpPlus.Net;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
 
 namespace Bot.Implementations
 {
@@ -16,15 +13,29 @@ namespace Bot.Implementations
         public override void Run(DiscordClient discord)
         {
             var members = GetAllNonBotMembers(discord);
+            var channel = discord.GetChannelAsync(BotDetails.BotFeedChannel).GetAwaiter().GetResult();
             Dictionary<ulong, DateTime> memberStatus = new Dictionary<ulong, DateTime>();
-            members.ForEach(x => memberStatus[x.Id] = DateTime.Now);
+            Dictionary<ulong, DateTime> memberGameStatus = new Dictionary<ulong, DateTime>();
+            members.ForEach(x =>
+            {
+                memberStatus[x.Id] = DateTime.Now;
+                memberGameStatus[x.Id] = DateTime.Now;
+            });
             discord.PresenceUpdated += async x =>
             {
                 if (!memberStatus.ContainsKey(x.Member.Id)) return;
-                if (x.PresenceBefore.Status == x.Member.Presence.Status) return;
-                var timeDiff = DateTime.Now - memberStatus[x.Member.Id];
-                memberStatus[x.Member.Id] = DateTime.Now;
-                Program.logger.Log($"{x.Member.DisplayName} was {x.PresenceBefore.Status} for {GetTimeFormattedString(timeDiff)} and is now {x.Member.Presence.Status}.");
+                if (x.PresenceBefore.Status != x.Member.Presence.Status)
+                {
+                    var timeDiff = DateTime.Now - memberStatus[x.Member.Id];
+                    memberStatus[x.Member.Id] = DateTime.Now;
+                    Program.logger.Log($"{x.Member.DisplayName} was {x.PresenceBefore.Status} for {GetTimeFormattedString(timeDiff)} and is now {x.Member.Presence.Status}.");
+                }
+                if (x.PresenceBefore.Game != null && (x.Member.Presence.Game == null || !x.PresenceBefore.Game.Name.Equals(x.Member.Presence.Game.Name)))
+                {
+                    var timeDiff = DateTime.Now - memberGameStatus[x.Member.Id];
+                    memberGameStatus[x.Member.Id] = DateTime.Now;
+                    await channel.SendMessageAsync($"{x.Member.Mention} played {x.PresenceBefore.Game.Name} for {GetTimeFormattedString(timeDiff)}.");
+                }
             };
         }
 
