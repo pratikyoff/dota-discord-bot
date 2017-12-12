@@ -13,7 +13,8 @@ namespace Bot.Implementations
         public override void Run(DiscordClient discord)
         {
             var members = GetAllNonBotMembers(discord);
-            var channel = discord.GetChannelAsync(BotDetails.BotFeedChannel).GetAwaiter().GetResult();
+            var botFeedChannel = discord.GetChannelAsync(BotDetails.BotFeedChannel).GetAwaiter().GetResult();
+            var botDumpChannel = discord.GetChannelAsync(BotDetails.BotDumpChannel).GetAwaiter().GetResult();
             Dictionary<ulong, DateTime> memberStatus = new Dictionary<ulong, DateTime>();
             Dictionary<ulong, DateTime> memberGameStatus = new Dictionary<ulong, DateTime>();
             members.ForEach(x =>
@@ -28,13 +29,13 @@ namespace Bot.Implementations
                 {
                     var timeDiff = DateTime.Now - memberStatus[x.Member.Id];
                     memberStatus[x.Member.Id] = DateTime.Now;
-                    Program.logger.Log($"{x.Member.DisplayName} was {x.PresenceBefore.Status} for {GetTimeFormattedString(timeDiff)} and is now {x.Member.Presence.Status}.");
+                    await botDumpChannel.SendMessageAsync($"{DateTime.Now}: {x.Member.DisplayName} was {x.PresenceBefore.Status} for {GetTimeFormattedString(timeDiff)} and is now {x.Member.Presence.Status}.");
                 }
                 if (x.PresenceBefore.Game != null && (x.Member.Presence.Game == null || !x.PresenceBefore.Game.Name.Equals(x.Member.Presence.Game.Name)))
                 {
                     var timeDiff = DateTime.Now - memberGameStatus[x.Member.Id];
                     memberGameStatus[x.Member.Id] = DateTime.Now;
-                    await channel.SendMessageAsync($"{x.Member.Mention} played {x.PresenceBefore.Game.Name} for {GetTimeFormattedString(timeDiff)}.");
+                    await botDumpChannel.SendMessageAsync($"{DateTime.Now}: {x.Member.Mention} played {x.PresenceBefore.Game.Name} for {GetTimeFormattedString(timeDiff)}.");
                 }
             };
         }

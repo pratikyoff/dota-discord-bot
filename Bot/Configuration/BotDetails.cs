@@ -10,5 +10,6 @@
         public static string ApiUrl { get => "https://discordapp.com/api/"; }
         public static string CommandPrefix { get => "!"; }
         public static ulong BotFeedChannel { get => 387244251936849930; }
+        public static ulong BotDumpChannel { get => 390087493766217738; }
     }
 }
