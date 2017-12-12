@@ -11,18 +11,21 @@ namespace Bot.Configuration
         public static string PingCommandString { get => "ping"; }
         public static string DocCommandString { get => "doc"; }
         public static string RemindMeCommandString { get => "remindme"; }
+        public static string CleanCommandString { get => "clean"; }
 
         private static VoteCommand _voteCommand = new VoteCommand();
         private static PingCommand _pingCommand = new PingCommand();
         private static DocumentationCommand _docCommand = new DocumentationCommand();
         private static RemindMeCommand _remindMeCommand = new RemindMeCommand();
+        private static CleanCommand _cleanCommand = new CleanCommand();
 
         public static Dictionary<string, ICommand> Get = new Dictionary<string, ICommand>(StringComparer.OrdinalIgnoreCase)
         {
             { VoteCommandString , _voteCommand },
             { PingCommandString , _pingCommand },
             { DocCommandString , _docCommand },
-            { RemindMeCommandString , _remindMeCommand }
+            { RemindMeCommandString , _remindMeCommand },
+            {CleanCommandString , _cleanCommand }
         };
     }
 }
