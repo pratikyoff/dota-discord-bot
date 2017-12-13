@@ -6,6 +6,7 @@ using DSharpPlus.Entities;
 using Bot.Configuration;
 using System.Linq;
 using Bot.Universal;
+using System.Text.RegularExpressions;
 
 namespace Bot.Implementations
 {
@@ -48,7 +49,13 @@ namespace Bot.Implementations
 
         private string GetRandomAbuse(ulong id)
         {
-            throw new NotImplementedException();
+            int totalLines = FileOperations.GetTotalNoOfLinesInFile(ExpletiveConfig.StoredExpletivesFile);
+            int randomLineNo = (new Random()).Next(totalLines);
+            string line = FileOperations.ReadLineNo(ExpletiveConfig.StoredExpletivesFile, randomLineNo);
+            string decrypted = _crypter.Decrypt(line);
+            string userText = ":user:";
+            decrypted = decrypted.Replace(userText, $"<@{id}>");
+            return decrypted;
         }
 
         private bool IsMention(string word)
@@ -56,7 +63,7 @@ namespace Bot.Implementations
             string userId = string.Empty;
             try
             {
-                userId = string.Join("", word.Substring(2).SkipLast(1));
+                userId = Regex.Matches(word, "[0-9]+").First().Value;
             }
             catch
             {
