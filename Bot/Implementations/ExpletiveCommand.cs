@@ -5,18 +5,26 @@ using System.Text;
 using DSharpPlus.Entities;
 using Bot.Configuration;
 using System.Linq;
+using Bot.Universal;
 
 namespace Bot.Implementations
 {
     public class ExpletiveCommand : ICommand
     {
+        private ICrypter _crypter;
+
+        public ExpletiveCommand()
+        {
+            _crypter = new Crypter();
+        }
+
         public string Process(DiscordMessage message)
         {
             if (CommandConfiguration.ExpletiveCommandString.Length + 2 > message.Content.Length)
                 return "Are you stupid?";
             string nonCommand = message.Content.Substring(CommandConfiguration.ExpletiveCommandString.Length + 2);
             string[] words = nonCommand.Split(' ');
-            string[] subCommands = { "add", "confirm", "delete" };
+            string[] subCommands = { "add", "confirm", "delete", "status" };
             if (IsMention(words[0]))
             {
                 if (words.Length > 1)
