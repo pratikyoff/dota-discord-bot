@@ -7,6 +7,7 @@ using Bot.Configuration;
 using System.Linq;
 using Bot.Universal;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace Bot.Implementations
 {
@@ -41,10 +42,41 @@ namespace Bot.Implementations
             {
                 switch (words[0].ToLowerInvariant())
                 {
-                    case "add": break;
+                    case "add":
+                        message.DeleteAsync();
+                        if (userAlreadyProcessing(message.Author.Id))
+                        {
+                            return "You cannot submit another expletive until your first one is processed.";
+                        }
+                        if (words.Select(x => x.Equals(":user:")).Count() == 0)
+                        {
+                            return "There must be a `:user:` mentioned in the abuse.";
+                        }
+                        string encryptedExpletive = _crypter.Encrypt(string.Join(' ', words.Skip(1)));
+                        string toStore = $"{message.Author.Id}|{encryptedExpletive}";
+                        FileOperations.AppendLine(ExpletiveConfig.UnconfiremedExpletivesFile, toStore);
+                        return $"{message.Author.Mention}, your abuse has been submitted for processing.";
+                    case "status":
+
+                        break;
                 }
             }
             return string.Empty;
+        }
+
+        private bool userAlreadyProcessing(ulong id)
+        {
+            using (StreamReader sr = new StreamReader(ExpletiveConfig.UnconfiremedExpletivesFile))
+            {
+                string line = null;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    string idInLine = line.Split('|')[0];
+                    if (id.ToString().Equals(idInLine))
+                        return true;
+                }
+            }
+            return false;
         }
 
         private string GetRandomAbuse(ulong id)

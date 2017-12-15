@@ -7,7 +7,15 @@ namespace Bot.Universal
     {
         public static int GetTotalNoOfLinesInFile(string fileName)
         {
-            int lineCount = File.ReadLines(fileName).Count();
+            int lineCount;
+            try
+            {
+                lineCount = File.ReadLines(fileName).Count();
+            }
+            catch
+            {
+                return -1;
+            }
             return lineCount;
         }
 
