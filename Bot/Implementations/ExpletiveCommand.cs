@@ -57,11 +57,43 @@ namespace Bot.Implementations
                         FileOperations.AppendLine(ExpletiveConfig.UnconfiremedExpletivesFile, toStore);
                         return $"{message.Author.Mention}, your abuse has been submitted for processing.";
                     case "status":
-
-                        break;
+                        var members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
+                        DiscordMember messageAuthor = null;
+                        foreach (var member in members)
+                        {
+                            if (member.Id != message.Author.Id) continue;
+                            messageAuthor = member;
+                            if (!member.IsOwner)
+                            {
+                                return "You are not authorized to use this command.";
+                            }
+                            else break;
+                        }
+                        using (StreamReader reader = new StreamReader(ExpletiveConfig.UnconfiremedExpletivesFile))
+                        {
+                            string line = null;
+                            messageAuthor.SendMessageAsync("Vote Status:").GetAwaiter().GetResult();
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                words = line.Split('|');
+                                string actualLine = $"{GetNameFromId(words[0], members)} - {_crypter.Decrypt(words[1])}";
+                                messageAuthor.SendMessageAsync(actualLine);
+                            }
+                        }
+                        return "Status sent.";
                 }
             }
             return string.Empty;
+        }
+
+        private string GetNameFromId(string id, IEnumerable<DiscordMember> members)
+        {
+            foreach (var member in members)
+            {
+                if (member.Id.ToString().Equals(id))
+                    return member.DisplayName;
+            }
+            return null;
         }
 
         private bool userAlreadyProcessing(ulong id)
