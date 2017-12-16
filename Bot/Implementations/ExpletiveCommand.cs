@@ -1,7 +1,6 @@
 ﻿using Bot.Contracts;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using DSharpPlus.Entities;
 using Bot.Configuration;
 using System.Linq;
@@ -14,10 +13,16 @@ namespace Bot.Implementations
     public class ExpletiveCommand : ICommand
     {
         private ICrypter _crypter;
+        private IEnumerable<DiscordMember> _members;
+        private Dictionary<ulong, DateTime> _lastUseTime;
+        private int _timeLimitSecs;
 
         public ExpletiveCommand()
         {
             _crypter = new Crypter();
+            _members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
+            _lastUseTime = new Dictionary<ulong, DateTime>();
+            _timeLimitSecs = 30;
         }
 
         public string Process(DiscordMessage message)
@@ -35,6 +40,14 @@ namespace Bot.Implementations
                 }
                 else
                 {
+                    if (_lastUseTime.Keys.Contains(message.Author.Id))
+                    {
+                        var diff = DateTime.UtcNow - _lastUseTime[message.Author.Id];
+                        int seconds = (int)Math.Ceiling(diff.TotalSeconds);
+                        if (seconds < _timeLimitSecs)
+                            return $"{message.Author.Mention} You can abuse again in {_timeLimitSecs - seconds} seconds.";
+                    }
+                    _lastUseTime[message.Author.Id] = DateTime.UtcNow;
                     return GetRandomAbuse(message.MentionedUsers.First().Id);
                 }
             }
@@ -58,8 +71,7 @@ namespace Bot.Implementations
                         return $"{message.Author.Mention}, your abuse has been submitted for processing.";
 
                     case "status":
-                        var members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
-                        DiscordMember messageAuthor = IsMemberAuthorized(message.Author.Id, members);
+                        DiscordMember messageAuthor = IsMemberAuthorized(message.Author.Id, _members);
                         if (messageAuthor == null) return "You are not authorized to use this command.";
                         using (StreamReader reader = new StreamReader(ExpletiveConfig.UnconfiremedExpletivesFile))
                         {
@@ -68,15 +80,14 @@ namespace Bot.Implementations
                             while ((line = reader.ReadLine()) != null)
                             {
                                 var splitLine = line.Split('|');
-                                string actualLine = $"{GetNameFromId(splitLine[0], members)} - {_crypter.Decrypt(splitLine[1])}";
+                                string actualLine = $"{GetNameFromId(splitLine[0], _members)} - {_crypter.Decrypt(splitLine[1])}";
                                 messageAuthor.SendMessageAsync(actualLine);
                             }
                         }
                         return "Status sent.";
 
                     case "approve":
-                        members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
-                        messageAuthor = IsMemberAuthorized(message.Author.Id, members);
+                        messageAuthor = IsMemberAuthorized(message.Author.Id, _members);
                         if (messageAuthor == null) return "You are not authorized to use this command.";
                         if (words.Length != 2)
                             return "Usage: `approve @user`";
@@ -106,8 +117,7 @@ namespace Bot.Implementations
                         return $"<@{submitter}>, your abuse has been approved.";
 
                     case "reject":
-                        members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
-                        messageAuthor = IsMemberAuthorized(message.Author.Id, members);
+                        messageAuthor = IsMemberAuthorized(message.Author.Id, _members);
                         if (messageAuthor == null) return "You are not authorized to use this command.";
                         if (words.Length != 2)
                             return "Usage: `reject @user`";
