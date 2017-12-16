@@ -44,11 +44,11 @@ namespace Bot.Implementations
                 {
                     case "add":
                         message.DeleteAsync();
-                        if (userAlreadyProcessing(message.Author.Id))
+                        if (UserAlreadyProcessing(message.Author.Id))
                         {
                             return "You cannot submit another expletive until your first one is processed.";
                         }
-                        if (words.Select(x => x.Equals(":user:")).Count() == 0)
+                        if (words.Where(x => x.IndexOf(":user:") >= 0).Count() == 0)
                         {
                             return "There must be a `:user:` mentioned in the abuse.";
                         }
@@ -56,34 +56,101 @@ namespace Bot.Implementations
                         string toStore = $"{message.Author.Id}|{encryptedExpletive}";
                         FileOperations.AppendLine(ExpletiveConfig.UnconfiremedExpletivesFile, toStore);
                         return $"{message.Author.Mention}, your abuse has been submitted for processing.";
+
                     case "status":
                         var members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
-                        DiscordMember messageAuthor = null;
-                        foreach (var member in members)
-                        {
-                            if (member.Id != message.Author.Id) continue;
-                            messageAuthor = member;
-                            if (!member.IsOwner)
-                            {
-                                return "You are not authorized to use this command.";
-                            }
-                            else break;
-                        }
+                        DiscordMember messageAuthor = IsMemberAuthorized(message.Author.Id, members);
+                        if (messageAuthor == null) return "You are not authorized to use this command.";
                         using (StreamReader reader = new StreamReader(ExpletiveConfig.UnconfiremedExpletivesFile))
                         {
                             string line = null;
                             messageAuthor.SendMessageAsync("Vote Status:").GetAwaiter().GetResult();
                             while ((line = reader.ReadLine()) != null)
                             {
-                                words = line.Split('|');
-                                string actualLine = $"{GetNameFromId(words[0], members)} - {_crypter.Decrypt(words[1])}";
+                                var splitLine = line.Split('|');
+                                string actualLine = $"{GetNameFromId(splitLine[0], members)} - {_crypter.Decrypt(splitLine[1])}";
                                 messageAuthor.SendMessageAsync(actualLine);
                             }
                         }
                         return "Status sent.";
+
+                    case "approve":
+                        members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
+                        messageAuthor = IsMemberAuthorized(message.Author.Id, members);
+                        if (messageAuthor == null) return "You are not authorized to use this command.";
+                        if (words.Length != 2)
+                            return "Usage: `approve @user`";
+                        var approvedUser = message.MentionedUsers.First();
+                        int lineNo = -1;
+                        string expletive = null;
+                        string submitter = null;
+                        using (StreamReader reader = new StreamReader(ExpletiveConfig.UnconfiremedExpletivesFile))
+                        {
+                            string line = null;
+                            for (int i = 0; (line = reader.ReadLine()) != null; i++)
+                            {
+                                words = line.Split('|');
+                                if (words[0].Equals(messageAuthor.Id.ToString()))
+                                {
+                                    lineNo = i;
+                                    expletive = line.Split('|')[1];
+                                    submitter = line.Split('|')[0];
+                                    break;
+                                }
+                            }
+                        }
+                        if (lineNo < 0)
+                            return "Submission not found for the user.";
+                        FileOperations.AppendLine(ExpletiveConfig.StoredExpletivesFile, expletive);
+                        FileOperations.DeleteLine(ExpletiveConfig.UnconfiremedExpletivesFile, lineNo);
+                        return $"<@{submitter}>, your abuse has been approved.";
+
+                    case "reject":
+                        members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
+                        messageAuthor = IsMemberAuthorized(message.Author.Id, members);
+                        if (messageAuthor == null) return "You are not authorized to use this command.";
+                        if (words.Length != 2)
+                            return "Usage: `reject @user`";
+                        approvedUser = message.MentionedUsers.First();
+                        lineNo = -1;
+                        expletive = null;
+                        submitter = null;
+                        using (StreamReader reader = new StreamReader(ExpletiveConfig.UnconfiremedExpletivesFile))
+                        {
+                            string line = null;
+                            for (int i = 0; (line = reader.ReadLine()) != null; i++)
+                            {
+                                words = line.Split('|');
+                                if (words[0].Equals(messageAuthor.Id.ToString()))
+                                {
+                                    lineNo = i;
+                                    expletive = line.Split('|')[1];
+                                    submitter = line.Split('|')[0];
+                                    break;
+                                }
+                            }
+                        }
+                        if (lineNo < 0)
+                            return "Submission not found for the user.";
+                        FileOperations.DeleteLine(ExpletiveConfig.UnconfiremedExpletivesFile, lineNo);
+                        return $"<@{submitter}>, your abuse has been rejected.";
                 }
             }
             return string.Empty;
+        }
+
+        private DiscordMember IsMemberAuthorized(ulong id, IEnumerable<DiscordMember> members)
+        {
+            foreach (var member in members)
+            {
+                if (member.Id != id) continue;
+                if (member.IsOwner)
+                {
+                    return member;
+                }
+                else break;
+            }
+            return null;
         }
 
         private string GetNameFromId(string id, IEnumerable<DiscordMember> members)
@@ -96,7 +163,7 @@ namespace Bot.Implementations
             return null;
         }
 
-        private bool userAlreadyProcessing(ulong id)
+        private bool UserAlreadyProcessing(ulong id)
         {
             using (StreamReader sr = new StreamReader(ExpletiveConfig.UnconfiremedExpletivesFile))
             {
