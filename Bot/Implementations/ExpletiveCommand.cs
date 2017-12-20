@@ -104,8 +104,8 @@ namespace Bot.Implementations
                                 if (words[0].Equals(messageAuthor.Id.ToString()))
                                 {
                                     lineNo = i;
-                                    expletive = line.Split('|')[1];
-                                    submitter = line.Split('|')[0];
+                                    expletive = words[1];
+                                    submitter = words[0];
                                     break;
                                 }
                             }
