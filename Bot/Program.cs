@@ -1,9 +1,9 @@
 ﻿using Bot.Configuration;
 using Bot.Contracts;
 using Bot.Implementations;
+using Bot.Universal;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using Newtonsoft.Json;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,7 +53,7 @@ namespace Bot
 
             await Discord.UpdateStatusAsync(new DiscordGame(BotDetails.CommandPrefix + "doc"));
 
-            foreach (var functionality in FunctionalityConfiguration.Functionalities)
+            foreach (var functionality in ReflectiveEnumerator.GetInheritedClasses<Functionality>())
             {
                 functionality.Start(Discord);
             }

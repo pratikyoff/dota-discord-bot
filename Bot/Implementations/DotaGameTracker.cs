@@ -2,9 +2,9 @@
 using Bot.Configuration;
 using Bot.Contracts;
 using Bot.Models;
+using Bot.Universal;
 using DSharpPlus;
 using System.Net.Http;
-using Newtonsoft.Json;
 using System.Threading;
 using DSharpPlus.Entities;
 using System.Linq;
@@ -39,7 +39,7 @@ namespace Bot.Implementations
                             player.TotalMatches = currentMatches;
 
                             var jsonString = GetResponseOfURL($"players/{player.SteamId}/matches?limit=1");
-                            dynamic lastMatch = ((dynamic)JsonConvert.DeserializeObject(jsonString))[0];
+                            dynamic lastMatch = JsonToFrom.FromJson<dynamic>(jsonString)[0];
                             string matchId = lastMatch.match_id;
                             if (!matchIdToPlayersMapping.ContainsKey(matchId))
                                 matchIdToPlayersMapping[matchId] = new List<Player>();
@@ -50,7 +50,7 @@ namespace Bot.Implementations
                     foreach (var matchId in matchIdToPlayersMapping.Keys)
                     {
                         string matchDetailsString = GetResponseOfURL($"matches/{matchId}");
-                        dynamic matchDetails = JsonConvert.DeserializeObject(matchDetailsString);
+                        dynamic matchDetails = JsonToFrom.FromJson<dynamic>(matchDetailsString);
                         string reply = string.Empty;
                         foreach (var player in matchIdToPlayersMapping[matchId])
                         {
@@ -123,7 +123,7 @@ namespace Bot.Implementations
                 {
                     isError = false;
                     jsonString = GetResponseOfURL($"players/{player.SteamId}/wl");
-                    responseInJson = JsonConvert.DeserializeObject(jsonString);
+                    responseInJson = JsonToFrom.FromJson<dynamic>(jsonString);
                     int[] winAndLose = new int[2] { responseInJson.win, responseInJson.lose };
                     return winAndLose;
                 }
