@@ -29,13 +29,13 @@ namespace Bot.Implementations
                 {
                     var timeDiff = DateTime.Now - memberStatus[x.Member.Id];
                     memberStatus[x.Member.Id] = DateTime.Now;
-                    await botDumpChannel.SendMessageAsync($"{DateTime.Now}: {x.Member.DisplayName} was {x.PresenceBefore.Status} for {GetTimeFormattedString(timeDiff)} and is now {x.Member.Presence.Status}.");
+                    Program.logger.Log($"{x.Member.DisplayName} was {x.PresenceBefore.Status} for {GetTimeFormattedString(timeDiff)} and is now {x.Member.Presence.Status}.");
                 }
                 if (x.PresenceBefore.Game != null && (x.Member.Presence.Game == null || !x.PresenceBefore.Game.Name.Equals(x.Member.Presence.Game.Name)))
                 {
                     var timeDiff = DateTime.Now - memberGameStatus[x.Member.Id];
                     memberGameStatus[x.Member.Id] = DateTime.Now;
-                    await botDumpChannel.SendMessageAsync($"{DateTime.Now}: {x.Member.Mention} played {x.PresenceBefore.Game.Name} for {GetTimeFormattedString(timeDiff)}.");
+                    Program.logger.Log($"{x.Member.DisplayName} played {x.PresenceBefore.Game.Name} for {GetTimeFormattedString(timeDiff)}.");
                 }
             };
         }

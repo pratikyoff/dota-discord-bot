@@ -61,11 +61,12 @@ namespace Bot.Implementations
                         }
                         string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
                         _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}").GetAwaiter().GetResult();
+                        Program.logger.Log($"Match Details logged for match id: {matchId}");
                     }
                 }
                 catch (Exception e)
                 {
-                    Program.logger.Log(e.Message + e.StackTrace);
+                    Program.logger.Log($"Exception in {GetType().Name}\nMessage: {e.Message}\nStack Trace: {e.StackTrace}");
                     Thread.Sleep(30 * 1000);
                     continue;
                 }
