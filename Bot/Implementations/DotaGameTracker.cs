@@ -9,6 +9,7 @@ using System.Threading;
 using DSharpPlus.Entities;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Bot.Implementations
 {
@@ -16,14 +17,14 @@ namespace Bot.Implementations
     {
         private HttpClient httpClient = new HttpClient();
         private DiscordChannel _botTestingChannel;
-        public override void Run(DiscordClient discord)
+        public override async void Run(DiscordClient discord)
         {
-            _botTestingChannel = discord.GetChannelAsync(BotDetails.BotFeedChannel).GetAwaiter().GetResult();
+            _botTestingChannel = await discord.GetChannelAsync(BotDetails.BotFeedChannel);
             var listOfPlayers = PlayerConfiguration.Players;
             httpClient.BaseAddress = new Uri(OpenDotaConfiguration.OpenDotaAPIAddress);
             foreach (var player in listOfPlayers)
             {
-                player.TotalMatches = GetTotalMatches(player);
+                player.TotalMatches = await GetTotalMatches(player);
             }
             while (true)
             {
@@ -32,13 +33,13 @@ namespace Bot.Implementations
                     Dictionary<string, List<Player>> matchIdToPlayersMapping = new Dictionary<string, List<Player>>();
                     foreach (var player in listOfPlayers)
                     {
-                        var currentMatches = GetTotalMatches(player);
+                        var currentMatches = await GetTotalMatches(player);
                         if (currentMatches != player.TotalMatches)
                         {
                             int extraGames = currentMatches - player.TotalMatches;
                             player.TotalMatches = currentMatches;
 
-                            var jsonString = GetResponseOfURL($"players/{player.SteamId}/matches?limit=1");
+                            var jsonString = await GetResponseOfURL($"players/{player.SteamId}/matches?limit=1");
                             dynamic lastMatch = JsonToFrom.FromJson<dynamic>(jsonString)[0];
                             string matchId = lastMatch.match_id;
                             if (!matchIdToPlayersMapping.ContainsKey(matchId))
@@ -49,7 +50,7 @@ namespace Bot.Implementations
                     }
                     foreach (var matchId in matchIdToPlayersMapping.Keys)
                     {
-                        string matchDetailsString = GetResponseOfURL($"matches/{matchId}");
+                        string matchDetailsString = await GetResponseOfURL($"matches/{matchId}");
                         dynamic matchDetails = JsonToFrom.FromJson<dynamic>(matchDetailsString);
                         string reply = string.Empty;
                         foreach (var player in matchIdToPlayersMapping[matchId])
@@ -60,7 +61,7 @@ namespace Bot.Implementations
                             reply += $"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n";
                         }
                         string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
-                        _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}").GetAwaiter().GetResult();
+                        await _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}");
                         Program.logger.Log($"Match Details logged for match id: {matchId}");
                     }
                 }
@@ -107,13 +108,13 @@ namespace Bot.Implementations
             return result;
         }
 
-        private int GetTotalMatches(Player player)
+        private async Task<int> GetTotalMatches(Player player)
         {
-            int[] winLose = GetNumberOfWinsAndLosses(player);
+            int[] winLose = await GetNumberOfWinsAndLosses(player);
             return winLose[0] + winLose[1];
         }
 
-        private int[] GetNumberOfWinsAndLosses(Player player)
+        private async Task<int[]> GetNumberOfWinsAndLosses(Player player)
         {
             string jsonString;
             dynamic responseInJson;
@@ -123,7 +124,7 @@ namespace Bot.Implementations
                 try
                 {
                     isError = false;
-                    jsonString = GetResponseOfURL($"players/{player.SteamId}/wl");
+                    jsonString = await GetResponseOfURL($"players/{player.SteamId}/wl");
                     responseInJson = JsonToFrom.FromJson<dynamic>(jsonString);
                     int[] winAndLose = new int[2] { responseInJson.win, responseInJson.lose };
                     return winAndLose;
@@ -137,10 +138,10 @@ namespace Bot.Implementations
             return new int[] { 0, 0 };
         }
 
-        private string GetResponseOfURL(string url)
+        private async Task<string> GetResponseOfURL(string url)
         {
-            var response = httpClient.GetAsync(url).GetAwaiter().GetResult();
-            var responseStream = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            var response = await httpClient.GetAsync(url);
+            var responseStream = await response.Content.ReadAsStringAsync();
             return responseStream;
         }
     }

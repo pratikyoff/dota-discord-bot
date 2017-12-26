@@ -7,6 +7,7 @@ using System.Linq;
 using Bot.Universal;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Bot.Implementations
 {
@@ -25,7 +26,7 @@ namespace Bot.Implementations
             _timeLimitSecs = 30;
         }
 
-        public string Process(DiscordMessage message)
+        public async Task<string> Process(DiscordMessage message)
         {
             if (CommandConfiguration.ExpletiveCommandString.Length + 2 > message.Content.Length)
                 return "Are you stupid?";
@@ -56,7 +57,7 @@ namespace Bot.Implementations
                 switch (words[0].ToLowerInvariant())
                 {
                     case "add":
-                        message.DeleteAsync();
+                        await message.DeleteAsync();
                         if (UserAlreadyProcessing(message.Author.Id))
                         {
                             return "You cannot submit another expletive until your first one is processed.";
@@ -76,12 +77,12 @@ namespace Bot.Implementations
                         using (StreamReader reader = new StreamReader(ExpletiveConfig.UnconfiremedExpletivesFile))
                         {
                             string line = null;
-                            messageAuthor.SendMessageAsync("Vote Status:").GetAwaiter().GetResult();
+                            await messageAuthor.SendMessageAsync("Vote Status:");
                             while ((line = reader.ReadLine()) != null)
                             {
                                 var splitLine = line.Split('|');
                                 string actualLine = $"{GetNameFromId(splitLine[0], _members)} - {_crypter.Decrypt(splitLine[1])}";
-                                messageAuthor.SendMessageAsync(actualLine);
+                                await messageAuthor.SendMessageAsync(actualLine);
                             }
                         }
                         return "Status sent.";

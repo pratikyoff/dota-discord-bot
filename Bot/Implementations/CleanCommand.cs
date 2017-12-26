@@ -1,28 +1,24 @@
 ﻿using Bot.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using DSharpPlus.Entities;
-using Bot.Configuration;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bot.Implementations
 {
     public class CleanCommand : ICommand
     {
-        public string Process(DiscordMessage message)
+        public async Task<string> Process(DiscordMessage message)
         {
             if (!message.Author.Id.ToString().Equals("162522319737061376"))
                 return "Not authorized";
-            var botFeedChannel = Program.Discord.GetChannelAsync(BotDetails.BotFeedChannel).GetAwaiter().GetResult();
-            var botDumpChannel = Program.Discord.GetChannelAsync(BotDetails.BotDumpChannel).GetAwaiter().GetResult();
-            var messages = botFeedChannel.GetMessagesAsync().GetAwaiter().GetResult();
+            var botFeedChannel = await Program.Discord.GetChannelAsync(BotDetails.BotFeedChannel);
+            var botDumpChannel = await Program.Discord.GetChannelAsync(BotDetails.BotDumpChannel);
+            var messages = await botFeedChannel.GetMessagesAsync();
             foreach (var chatMsg in messages)
             {
                 if (chatMsg.Content.IndexOf("played") >= 0)
                 {
-                    chatMsg.DeleteAsync().GetAwaiter().GetResult();
-                    botDumpChannel.SendMessageAsync(chatMsg.Content + " DELETED.").GetAwaiter().GetResult();
+                    await chatMsg.DeleteAsync();
+                    await botDumpChannel.SendMessageAsync(chatMsg.Content + " DELETED.");
                 }
             }
             return "Done";

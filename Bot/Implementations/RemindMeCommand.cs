@@ -3,7 +3,6 @@ using Bot.Models;
 using DSharpPlus.Entities;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Text.RegularExpressions;
@@ -38,21 +37,21 @@ namespace Bot.Implementations
 
         private List<Time> _listOfTimeConfig = new List<Time>() { _second, _minute, _hour, _day };
 
-        public string Process(DiscordMessage message)
+        public Task<string> Process(DiscordMessage message)
         {
             string[] words = message.Content.Split(' ');
             if (words.Length < 3)
-                return "Reminder must contain a subject and timer.\nUsage: `!RemindMe I have to do something! 2hours`";
+                return Task.FromResult("Reminder must contain a subject and timer.\nUsage: `!RemindMe I have to do something! 2hours`");
             string timerString = words.Last();
             int timeInSeconds = GetTimeInSeconds(timerString);
-            if (timeInSeconds < 0) return "Enter a valid time.";
+            if (timeInSeconds < 0) return Task.FromResult("Enter a valid time.");
             string subject = string.Join(" ", words.Skip(1).SkipLast(1));
-            Task.Factory.StartNew(() =>
+            Task.Run(async () =>
             {
                 Thread.Sleep(timeInSeconds * 1000);
-                message.RespondAsync($"Reminder for {message.Author.Mention}\nSubject: {subject}").GetAwaiter().GetResult();
+                await message.RespondAsync($"Reminder for {message.Author.Mention}\nSubject: {subject}");
             });
-            return $"Reminder created {message.Author.Mention}";
+            return Task.FromResult($"Reminder created {message.Author.Mention}");
         }
 
         private int GetTimeInSeconds(string timerString)

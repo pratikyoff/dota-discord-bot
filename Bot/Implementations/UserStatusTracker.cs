@@ -5,16 +5,17 @@ using System.Collections.Generic;
 using DSharpPlus.Entities;
 using Bot.Configuration;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Bot.Implementations
 {
     public class UserStatusTracker : Functionality
     {
-        public override void Run(DiscordClient discord)
+        public override async void Run(DiscordClient discord)
         {
-            var members = GetAllNonBotMembers(discord);
-            var botFeedChannel = discord.GetChannelAsync(BotDetails.BotFeedChannel).GetAwaiter().GetResult();
-            var botDumpChannel = discord.GetChannelAsync(BotDetails.BotDumpChannel).GetAwaiter().GetResult();
+            var members = await GetAllNonBotMembers(discord);
+            var botFeedChannel = await discord.GetChannelAsync(BotDetails.BotFeedChannel);
+            var botDumpChannel = await discord.GetChannelAsync(BotDetails.BotDumpChannel);
             Dictionary<ulong, DateTime> memberStatus = new Dictionary<ulong, DateTime>();
             Dictionary<ulong, DateTime> memberGameStatus = new Dictionary<ulong, DateTime>();
             members.ForEach(x =>
@@ -72,10 +73,10 @@ namespace Bot.Implementations
             return reply;
         }
 
-        public List<DiscordMember> GetAllNonBotMembers(DiscordClient discord)
+        public async Task<List<DiscordMember>> GetAllNonBotMembers(DiscordClient discord)
         {
-            DiscordGuild guild = discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult();
-            var members = guild.GetAllMembersAsync().GetAwaiter().GetResult().Where(x => !x.IsBot).ToList();
+            DiscordGuild guild = await discord.GetGuildAsync(GuildConfiguration.Id);
+            var members = (await guild.GetAllMembersAsync()).Where(x => !x.IsBot).ToList();
             return members;
         }
     }

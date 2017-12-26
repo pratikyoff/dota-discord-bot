@@ -1,7 +1,7 @@
 ﻿using Bot.Contracts;
-using System;
 using DSharpPlus.Entities;
 using Bot.Configuration;
+using System.Threading.Tasks;
 
 namespace Bot.Implementations
 {
@@ -14,9 +14,9 @@ namespace Bot.Implementations
             $"\t2.Voting - `!{CommandConfiguration.VoteCommandString} <optionNumber>` eg `!{CommandConfiguration.VoteCommandString} 2`\n" +
             $"\t3.Status - `!{CommandConfiguration.VoteCommandString} status`\n";
 
-        public string Process(DiscordMessage message)
+        public Task<string> Process(DiscordMessage message)
         {
-            return doc;
+            return Task.FromResult(doc);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Bot.Implementations
     public class VoteCommand : ICommand
     {
         private static Vote _vote = new Vote();
-        public string Process(DiscordMessage message)
+        public async Task<string> Process(DiscordMessage message)
         {
             if (CommandConfiguration.VoteCommandString.Length + 2 > message.Content.Length)
                 return "What are you doing?";
@@ -136,12 +136,12 @@ namespace Bot.Implementations
 
         private static void TimeoutVote(DiscordMessage message, string voteId)
         {
-            Task.Factory.StartNew(() =>
+            Task.Run(async () =>
             {
                 Thread.Sleep(_vote.TimeoutSeconds * 1000);
                 if (_vote.InProgress && _vote.Id.Equals(voteId))
                 {
-                    message.RespondAsync($"Vote has been time ended.\nHere are the final results.\n{GetVoteStatus()}").GetAwaiter().GetResult();
+                    await message.RespondAsync($"Vote has been time ended.\nHere are the final results.\n{GetVoteStatus()}");
                     _vote = new Vote();
                 }
             });
