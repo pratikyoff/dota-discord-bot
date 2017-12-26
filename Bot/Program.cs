@@ -62,7 +62,6 @@ namespace Bot
             {
                 if (x.Message.Content.IndexOf(BotDetails.CommandPrefix) == 0)
                 {
-                    logger.Log(JsonConvert.SerializeObject(x.Message));
                     string command = GetFirstWord(x.Message.Content);
                     string reply = string.Empty;
                     try
@@ -70,7 +69,7 @@ namespace Bot
                         reply = CommandConfiguration.Get[command].Process(x.Message);
                     }
                     catch { }
-                    logger.Log(reply);
+                    logger.Log($"<Message: {x.Message.Content}>\t<Author: {x.Author.Id}>\t<Name: {x.Author.Username}>\t<Reply: {reply}>");
                     await x.Message.RespondAsync(reply);
                 }
             };

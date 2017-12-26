@@ -7,7 +7,7 @@ namespace Bot.Implementations
     {
         public void Log(string log)
         {
-            Console.WriteLine(log);
+            Console.WriteLine($"{DateTime.UtcNow.ToString("yyyyMMdd hh:mm:ss tt")}: {log}");
         }
     }
 }
