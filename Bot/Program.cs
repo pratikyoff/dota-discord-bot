@@ -23,7 +23,10 @@ namespace Bot
             {
                 AsyncMain().ConfigureAwait(false).GetAwaiter().GetResult();
             }
-            catch { }
+            catch (Exception e)
+            {
+                logger.Log($"Exception:{e.Message}\n{e.StackTrace}");
+            }
 
             foreach (var functionality in FunctionalityConfiguration.Functionalities)
             {
