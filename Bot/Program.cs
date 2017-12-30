@@ -13,11 +13,13 @@ namespace Bot
     class Program
     {
         public static DiscordClient Discord { get; private set; }
-        public static ILogger logger;
+        public static ILogger Logger;
+        public static ILogger DumpLogger;
 
         static void Main(string[] args)
         {
-            logger = new ConsoleLogger();
+            Logger = new ConsoleLogger();
+            DumpLogger = new ConsoleLogger();
 
             try
             {
@@ -25,13 +27,14 @@ namespace Bot
             }
             catch (Exception e)
             {
-                logger.Log($"Exception:{e.Message}\n{e.StackTrace}");
+                DumpLogger.Log($"Exception:{e.Message}\n{e.StackTrace}");
             }
 
             foreach (var functionality in FunctionalityConfiguration.Functionalities)
             {
                 functionality.Stop();
             }
+            Logger.Log("Disconnecting from Discord.");
             Discord.DisconnectAsync().GetAwaiter().GetResult();
             Discord.Dispose();
         }
@@ -52,7 +55,7 @@ namespace Bot
             });
 
             await Discord.ConnectAsync();
-            logger.Log("Discord Connected");
+            Logger.Log("Discord Connected");
 
             await Discord.UpdateStatusAsync(new DiscordGame(BotDetails.CommandPrefix + "doc"));
 
@@ -72,7 +75,7 @@ namespace Bot
                         reply = await CommandConfiguration.Get[command].Process(x.Message);
                     }
                     catch { }
-                    logger.Log($"<Message: {x.Message.Content}>\t<Author: {x.Author.Id}>\t<Name: {x.Author.Username}>\t<Reply: {reply}>");
+                    Logger.Log($"<Message: {x.Message.Content}>\t<Author: {x.Author.Id}>\t<Name: {x.Author.Username}>\t<Reply: {reply}>");
                     await x.Message.RespondAsync(reply);
                 }
             };

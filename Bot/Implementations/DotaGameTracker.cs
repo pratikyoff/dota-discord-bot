@@ -30,6 +30,7 @@ namespace Bot.Implementations
             {
                 try
                 {
+                    Program.DumpLogger.Log("Fetching Wins and Losses for players.");
                     Dictionary<string, List<Player>> matchIdToPlayersMapping = new Dictionary<string, List<Player>>();
                     foreach (var player in listOfPlayers)
                     {
@@ -62,12 +63,12 @@ namespace Bot.Implementations
                         }
                         string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
                         await _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}");
-                        Program.logger.Log($"Match Details logged for match id: {matchId}");
+                        Program.Logger.Log($"Match Details logged for match id: {matchId}");
                     }
                 }
                 catch (Exception e)
                 {
-                    Program.logger.Log($"Exception in {GetType().Name}\nMessage: {e.Message}\nStack Trace: {e.StackTrace}");
+                    Program.DumpLogger.Log($"Exception in {GetType().Name}\nMessage: {e.Message}\nStack Trace: {e.StackTrace}");
                     Thread.Sleep(30 * 1000);
                     continue;
                 }
