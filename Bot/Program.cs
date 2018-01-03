@@ -69,6 +69,7 @@ namespace Bot
                 if (x.Message.Content.IndexOf(BotDetails.CommandPrefix) == 0)
                 {
                     string command = GetFirstWord(x.Message.Content);
+                    if (!CommandConfiguration.Get.ContainsKey(command)) return;
                     string reply = string.Empty;
                     try
                     {
