@@ -102,7 +102,7 @@ namespace Bot.Implementations
                             for (int i = 0; (line = reader.ReadLine()) != null; i++)
                             {
                                 words = line.Split('|');
-                                if (words[0].Equals(messageAuthor.Id.ToString()))
+                                if (words[0].Equals(approvedUser.Id.ToString()))
                                 {
                                     lineNo = i;
                                     expletive = words[1];
