@@ -10,9 +10,16 @@ using System.Threading;
 
 namespace Bot.Implementations
 {
+    [Command("vote")]
     public class VoteCommand : ICommand
     {
         private static Vote _vote = new Vote();
+        private string _voteCommandText;
+
+        public VoteCommand()
+        {
+            _voteCommandText = CommandConfiguration.GetCommandText<VoteCommand>();
+        }
 
         public Task<string> Process(DiscordMessage message)
         {
@@ -21,9 +28,9 @@ namespace Bot.Implementations
 
         public string ProcessVote(DiscordMessage message)
         {
-            if (CommandConfiguration.VoteCommandString.Length + 2 > message.Content.Length)
+            if (_voteCommandText.Length + 2 > message.Content.Length)
                 return "What are you doing?";
-            string nonCommand = message.Content.Substring(CommandConfiguration.VoteCommandString.Length + 2);
+            string nonCommand = message.Content.Substring(_voteCommandText.Length + 2);
             string[] words = nonCommand.Split(' ');
             bool isChoice = int.TryParse(words[0], out int choice);
             if (StatusCommandCheck(words))

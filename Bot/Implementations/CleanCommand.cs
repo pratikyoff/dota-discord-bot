@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Bot.Implementations
 {
+    [Command("clean")]
     public class CleanCommand : ICommand
     {
         public async Task<string> Process(DiscordMessage message)

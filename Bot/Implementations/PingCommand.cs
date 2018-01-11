@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Bot.Configuration
 {
+    [Command("ping")]
     public class PingCommand : ICommand
     {
         public Task<string> Process(DiscordMessage message)

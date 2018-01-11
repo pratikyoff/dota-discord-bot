@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace Bot.Implementations
 {
+    [Command("remindme")]
     public class RemindMeCommand : ICommand
     {
         private static Time _second = new Time()

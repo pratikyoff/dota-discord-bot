@@ -60,11 +60,12 @@ namespace Bot
 
             await Discord.UpdateStatusAsync(new DiscordGame(BotDetails.CommandPrefix + "doc"));
 
-            foreach (var functionality in ReflectiveEnumerator.GetInheritedClasses<Functionality>())
+            foreach (var functionality in ReflectiveEnumerator.GetInheritedFromAbstractClass<Functionality>())
             {
                 functionality.Start(Discord);
             }
 
+            CommandConfiguration.Initialize();
             Discord.MessageCreated += async x =>
             {
                 if (x.Message.Content.IndexOf(BotDetails.CommandPrefix) == 0)

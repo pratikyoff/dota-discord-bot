@@ -11,12 +11,14 @@ using System.Threading.Tasks;
 
 namespace Bot.Implementations
 {
+    [Command("abuse")]
     public class ExpletiveCommand : ICommand
     {
         private ICrypter _crypter;
         private IEnumerable<DiscordMember> _members;
         private Dictionary<ulong, DateTime> _lastUseTime;
         private int _timeLimitSecs;
+        private string _expletiveCommandText;
 
         public ExpletiveCommand()
         {
@@ -24,13 +26,14 @@ namespace Bot.Implementations
             _members = Program.Discord.GetGuildAsync(GuildConfiguration.Id).GetAwaiter().GetResult().Members;
             _lastUseTime = new Dictionary<ulong, DateTime>();
             _timeLimitSecs = 30;
+            _expletiveCommandText = CommandConfiguration.GetCommandText<ExpletiveCommand>();
         }
 
         public async Task<string> Process(DiscordMessage message)
         {
-            if (CommandConfiguration.ExpletiveCommandString.Length + 2 > message.Content.Length)
+            if (_expletiveCommandText.Length + 2 > message.Content.Length)
                 return "Are you stupid?";
-            string nonCommand = message.Content.Substring(CommandConfiguration.ExpletiveCommandString.Length + 2);
+            string nonCommand = message.Content.Substring(_expletiveCommandText.Length + 2);
             string[] words = nonCommand.Split(' ');
             string[] subCommands = { "add", "confirm", "delete", "status" };
             if (IsMention(words[0]))

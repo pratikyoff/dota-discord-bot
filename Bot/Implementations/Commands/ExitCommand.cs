@@ -8,6 +8,7 @@ using System.Threading;
 
 namespace Bot.Implementations
 {
+    [Command("exit")]
     public class ExitCommand : ICommand
     {
         public Task<string> Process(DiscordMessage message)
