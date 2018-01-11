@@ -1,4 +1,5 @@
-﻿using Bot.Contracts;
+﻿#pragma warning disable CS1998
+using Bot.Contracts;
 using System;
 using DSharpPlus;
 using System.Collections.Generic;

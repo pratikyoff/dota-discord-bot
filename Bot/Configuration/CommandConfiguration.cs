@@ -13,6 +13,7 @@ namespace Bot.Configuration
         public static string RemindMeCommandString { get => "remindme"; }
         public static string CleanCommandString { get => "clean"; }
         public static string ExpletiveCommandString { get => "abuse"; }
+        public static string ExitCommandString { get => "exit"; }
 
         private static VoteCommand _voteCommand = new VoteCommand();
         private static PingCommand _pingCommand = new PingCommand();
@@ -20,6 +21,7 @@ namespace Bot.Configuration
         private static RemindMeCommand _remindMeCommand = new RemindMeCommand();
         private static CleanCommand _cleanCommand = new CleanCommand();
         private static ExpletiveCommand _expletiveCommand = new ExpletiveCommand();
+        private static ExitCommand _exitCommand = new ExitCommand();
 
 
         public static Dictionary<string, ICommand> Get = new Dictionary<string, ICommand>(StringComparer.OrdinalIgnoreCase)
@@ -29,7 +31,8 @@ namespace Bot.Configuration
             { DocCommandString , _docCommand },
             { RemindMeCommandString , _remindMeCommand },
             { CleanCommandString , _cleanCommand },
-            { ExpletiveCommandString , _expletiveCommand }
+            { ExpletiveCommandString , _expletiveCommand },
+            { ExitCommandString , _exitCommand },
         };
     }
 }

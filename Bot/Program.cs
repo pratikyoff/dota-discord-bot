@@ -15,6 +15,7 @@ namespace Bot
         public static DiscordClient Discord { get; private set; }
         public static ILogger Logger;
         public static ILogger DumpLogger;
+        public static CancellationTokenSource CancellationTokenSource;
 
         static void Main(string[] args)
         {
@@ -41,11 +42,11 @@ namespace Bot
 
         private static async Task AsyncMain()
         {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            CancellationToken cancellationToken = cancellationTokenSource.Token;
+            CancellationTokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = CancellationTokenSource.Token;
             Console.CancelKeyPress += (x, y) =>
             {
-                cancellationTokenSource.Cancel();
+                CancellationTokenSource.Cancel();
             };
 
             Discord = new DiscordClient(new DiscordConfiguration()

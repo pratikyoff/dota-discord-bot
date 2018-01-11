@@ -13,7 +13,13 @@ namespace Bot.Implementations
     public class VoteCommand : ICommand
     {
         private static Vote _vote = new Vote();
-        public async Task<string> Process(DiscordMessage message)
+
+        public Task<string> Process(DiscordMessage message)
+        {
+            return Task.FromResult(ProcessVote(message));
+        }
+
+        public string ProcessVote(DiscordMessage message)
         {
             if (CommandConfiguration.VoteCommandString.Length + 2 > message.Content.Length)
                 return "What are you doing?";
