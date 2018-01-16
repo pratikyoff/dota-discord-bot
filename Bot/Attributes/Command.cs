@@ -2,7 +2,7 @@
 
 namespace Bot
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class Command : Attribute
     {
         public string CommandText { get; private set; }
