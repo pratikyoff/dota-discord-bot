@@ -1,4 +1,5 @@
-﻿using Bot.Contracts;
+﻿#pragma warning disable CS4014
+using Bot.Contracts;
 using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -30,11 +31,13 @@ namespace Bot.Implementations
                 {
                     if (voiceChannel.Value.Count == 1)
                     {
-                        Task task = Task.Run(async () =>
+                        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                        Task.Factory.StartNew(async () =>
                         {
-                            Thread.Sleep(10 * 1000);
+                            Thread.Sleep(60 * 1000);
                             await RemoveUserFromVoice(voiceChannel.Value[0], x.Guild);
-                        });
+                        }, cancellationTokenSource.Token);
+                        userSubjectToDC.Add(voiceChannel.Value[0].Id, cancellationTokenSource);
                     }
                     else
                     {
@@ -42,7 +45,7 @@ namespace Bot.Implementations
                         {
                             if (userSubjectToDC.ContainsKey(user.Id))
                             {
-                                userSubjectToDC[user.Id].Cancel(false);
+                                userSubjectToDC[user.Id].Cancel();
                                 userSubjectToDC.Remove(user.Id);
                             }
                         }
