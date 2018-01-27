@@ -1,41 +1,39 @@
 ﻿#pragma warning disable CS4014
+#pragma warning disable CS1998
 using Bot.Contracts;
 using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using System.Threading.Tasks;
 using System.Threading;
-using System;
 using System.Linq;
 
 namespace Bot.Implementations
 {
-    public class AFKVoicePurger : Functionality
+    //on hold
+    public class AFKVoicePurger //: Functionality
     {
         Dictionary<ulong, CancellationTokenSource> userSubjectToDC = new Dictionary<ulong, CancellationTokenSource>();
-        public override void Run(DiscordClient discord)
+        public void Run(DiscordClient discord)
         {
             discord.VoiceStateUpdated += async x =>
             {
                 Dictionary<ulong, List<DiscordUser>> channelToUserMapping = new Dictionary<ulong, List<DiscordUser>>();
-                foreach (var voiceState in x.Guild.VoiceStates)
-                {
-                    if (voiceState.Channel == null) continue;
-                    if (!channelToUserMapping.ContainsKey(voiceState.Channel.Id))
-                    {
-                        channelToUserMapping[voiceState.Channel.Id] = new List<DiscordUser>();
-                    }
-                    channelToUserMapping[voiceState.Channel.Id].Add(voiceState.User);
-                }
+
+                PopulateVoiceChatUsers(x.Guild.VoiceStates, channelToUserMapping);
+
                 foreach (var voiceChannel in channelToUserMapping)
                 {
                     if (voiceChannel.Value.Count == 1)
                     {
                         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                        Task.Factory.StartNew(async () =>
+                        Task.Run(async () =>
                         {
-                            Thread.Sleep(60 * 1000);
-                            await RemoveUserFromVoice(voiceChannel.Value[0], x.Guild);
+                            Thread.Sleep(10 * 1000);
+                            if (!cancellationTokenSource.IsCancellationRequested)
+                            {
+                                await RemoveUserFromVoice(voiceChannel.Value[0], x.Guild);
+                            }
                         }, cancellationTokenSource.Token);
                         userSubjectToDC.Add(voiceChannel.Value[0].Id, cancellationTokenSource);
                     }
@@ -52,6 +50,19 @@ namespace Bot.Implementations
                     }
                 }
             };
+        }
+
+        private static void PopulateVoiceChatUsers(IEnumerable<DiscordVoiceState> discordVoiceState, Dictionary<ulong, List<DiscordUser>> channelToUserMapping)
+        {
+            foreach (var voiceState in discordVoiceState)
+            {
+                if (voiceState.Channel == null) continue;
+                if (!channelToUserMapping.ContainsKey(voiceState.Channel.Id))
+                {
+                    channelToUserMapping[voiceState.Channel.Id] = new List<DiscordUser>();
+                }
+                channelToUserMapping[voiceState.Channel.Id].Add(voiceState.User);
+            }
         }
 
         private async Task RemoveUserFromVoice(DiscordUser user, DiscordGuild guild)

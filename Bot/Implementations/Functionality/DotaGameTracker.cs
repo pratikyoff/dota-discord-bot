@@ -15,13 +15,13 @@ namespace Bot.Implementations
 {
     public class DotaGameTracker : Functionality
     {
-        private HttpClient httpClient = new HttpClient();
+        private HttpClient _httpClient = new HttpClient();
         private DiscordChannel _botTestingChannel;
         public override async void Run(DiscordClient discord)
         {
             _botTestingChannel = await discord.GetChannelAsync(BotDetails.BotFeedChannel);
             var listOfPlayers = PlayerConfiguration.Players;
-            httpClient.BaseAddress = new Uri(OpenDotaConfiguration.OpenDotaAPIAddress);
+            _httpClient.BaseAddress = new Uri(OpenDotaConfiguration.OpenDotaAPIAddress);
             foreach (var player in listOfPlayers)
             {
                 player.TotalMatches = await GetTotalMatches(player);
@@ -40,7 +40,7 @@ namespace Bot.Implementations
                             int extraGames = currentMatches - player.TotalMatches;
                             player.TotalMatches = currentMatches;
 
-                            var jsonString = await GetResponseOfURL($"players/{player.SteamId}/matches?limit=1");
+                            var jsonString = await NetComm.GetResponseOfURL($"players/{player.SteamId}/matches?limit=1", _httpClient);
                             dynamic lastMatch = JsonToFrom.FromJson<dynamic>(jsonString)[0];
                             string matchId = lastMatch.match_id;
                             if (!matchIdToPlayersMapping.ContainsKey(matchId))
@@ -51,7 +51,7 @@ namespace Bot.Implementations
                     }
                     foreach (var matchId in matchIdToPlayersMapping.Keys)
                     {
-                        string matchDetailsString = await GetResponseOfURL($"matches/{matchId}");
+                        string matchDetailsString = await NetComm.GetResponseOfURL($"matches/{matchId}", _httpClient);
                         dynamic matchDetails = JsonToFrom.FromJson<dynamic>(matchDetailsString);
                         string reply = string.Empty;
                         foreach (var player in matchIdToPlayersMapping[matchId])
@@ -125,7 +125,7 @@ namespace Bot.Implementations
                 try
                 {
                     isError = false;
-                    jsonString = await GetResponseOfURL($"players/{player.SteamId}/wl");
+                    jsonString = await NetComm.GetResponseOfURL($"players/{player.SteamId}/wl", _httpClient);
                     responseInJson = JsonToFrom.FromJson<dynamic>(jsonString);
                     int[] winAndLose = new int[2] { responseInJson.win, responseInJson.lose };
                     return winAndLose;
@@ -137,13 +137,6 @@ namespace Bot.Implementations
                 }
             } while (isError);
             return new int[] { 0, 0 };
-        }
-
-        private async Task<string> GetResponseOfURL(string url)
-        {
-            var response = await httpClient.GetAsync(url);
-            var responseStream = await response.Content.ReadAsStringAsync();
-            return responseStream;
         }
     }
 }
