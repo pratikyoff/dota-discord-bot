@@ -53,13 +53,14 @@ namespace Bot.Implementations
                     {
                         string matchDetailsString = await NetComm.GetResponseOfURL($"matches/{matchId}", _httpClient);
                         dynamic matchDetails = JsonToFrom.FromJson<dynamic>(matchDetailsString);
+                        string normalOrRanked = GetNormalOrRankedMatch(matchDetails);
                         string reply = string.Empty;
                         foreach (var player in matchIdToPlayersMapping[matchId])
                         {
                             string winOrLose = FindPlayerGameResult(player, matchDetails);
                             string hero = FindHero(player, matchDetails);
                             string KDA = FindKDA(player, matchDetails);
-                            reply += $"<@{player.DiscordId}> **{winOrLose}** a game.\n**Hero**: {hero}\n**KDA**: {KDA}\n";
+                            reply += $"<@{player.DiscordId}> **{winOrLose}** a {normalOrRanked} game.\n**Hero**: {hero}\n**KDA**: {KDA}\n";
                         }
                         string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
                         await _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}");
@@ -74,6 +75,14 @@ namespace Bot.Implementations
                 }
                 Thread.Sleep(5 * 60 * 1000);
             }
+        }
+
+        private string GetNormalOrRankedMatch(dynamic matchDetails)
+        {
+            List<int> rankedModes = new List<int>() { 5, 6, 7 };
+            if (rankedModes.Contains(matchDetails.lobby_type))
+                return "ranked";
+            else return "unranked";
         }
 
         public string FindHero(Player player, dynamic matchDetails)
