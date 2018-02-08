@@ -25,8 +25,10 @@ namespace Bot.Implementations
         public override void Run(DiscordClient discord)
         {
             _httpClient.BaseAddress = _baseAddress;
-            Timer timer = new Timer(60 * 1000);
-            timer.AutoReset = true;
+            Timer timer = new Timer(60 * 1000)
+            {
+                AutoReset = true
+            };
             timer.Elapsed += async (sender, args) =>
             {
                 var istTimeNow = GetISTTimeNow();
@@ -51,16 +53,10 @@ namespace Bot.Implementations
             var channel = await Program.Discord.GetChannelAsync(BotDetails.BotFeedChannel);
             foreach (var player in PlayerConfiguration.Players)
             {
-                var winsString = await NetComm.GetResponseOfURL($"players/{player.SteamId}/matches?win=1&date=1", _httpClient);
-                dynamic winsInJson = winsString.FromJson<dynamic>();
-                List<dynamic> winsList = new List<dynamic>(winsInJson);
-                int wins = winsList.Count;
-
-                var lossString = await NetComm.GetResponseOfURL($"players/{player.SteamId}/matches?win=0&date=1", _httpClient);
-                dynamic lossesInJson = lossString.FromJson<dynamic>();
-                List<dynamic> lossesList = new List<dynamic>(lossesInJson);
-                int losses = lossesList.Count;
-
+                var jsonString = await NetComm.GetResponseOfURL($"players/{player.SteamId}/wl?date=1", _httpClient);
+                var responseInJson = JsonToFrom.FromJson<dynamic>(jsonString);
+                int wins = responseInJson.win;
+                int losses = responseInJson.lose;
                 if (wins + losses > 0)
                 {
                     string content = $"<@{player.DiscordId}> won {wins} game{GetPlural(wins)} out of {wins + losses} game{GetPlural(wins + losses)} today.";
