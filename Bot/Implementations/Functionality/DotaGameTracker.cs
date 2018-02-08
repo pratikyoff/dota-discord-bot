@@ -80,7 +80,7 @@ namespace Bot.Implementations
         private string GetNormalOrRankedMatch(dynamic matchDetails)
         {
             List<int> rankedModes = new List<int>() { 5, 6, 7 };
-            if (rankedModes.Contains(matchDetails.lobby_type))
+            if (rankedModes.Contains((int)matchDetails.lobby_type))
                 return "ranked";
             else return "unranked";
         }
