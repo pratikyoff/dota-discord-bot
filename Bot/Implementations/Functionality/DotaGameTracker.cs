@@ -17,6 +17,8 @@ namespace Bot.Implementations
     {
         private HttpClient _httpClient = new HttpClient();
         private DiscordChannel _botTestingChannel;
+        private readonly List<int> rankedModes = new List<int>() { 5, 6, 7 };
+
         public override async void Run(DiscordClient discord)
         {
             _botTestingChannel = await discord.GetChannelAsync(BotDetails.BotFeedChannel);
@@ -79,10 +81,9 @@ namespace Bot.Implementations
 
         private string GetNormalOrRankedMatch(dynamic matchDetails)
         {
-            List<int> rankedModes = new List<int>() { 5, 6, 7 };
             if (rankedModes.Contains((int)matchDetails.lobby_type))
                 return "ranked";
-            else return "unranked";
+            else return "normal";
         }
 
         public string FindHero(Player player, dynamic matchDetails)
