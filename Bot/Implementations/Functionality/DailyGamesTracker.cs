@@ -6,7 +6,6 @@ using System.Timers;
 using Bot.Configuration;
 using System.Threading.Tasks;
 using Bot.Universal;
-using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Bot.Implementations
