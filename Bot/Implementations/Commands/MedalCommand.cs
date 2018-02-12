@@ -48,9 +48,9 @@ namespace Bot.Implementations.Commands
             var jsonString = await NetComm.GetResponseOfURL(url, _httpClient);
             var playerInfo = JsonToFrom.FromJson<dynamic>(jsonString);
             string playerMedal = (string)playerInfo.rank_tier;
-            var actualMedal = (Medal)(int)char.GetNumericValue(playerMedal[0]);
+            var actualMedal = (Medal)((int)char.GetNumericValue(playerMedal[0]) - 1);
             var star = (int)char.GetNumericValue(playerMedal[1]);
-            return $"<@{id}> is {actualMedal}[{star}]";
+            return $"<@{id}> is {actualMedal}[{star}].";
         }
     }
 }
