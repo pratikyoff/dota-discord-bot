@@ -17,7 +17,7 @@ namespace Bot.Implementations
     {
         private HttpClient _httpClient = new HttpClient();
         private DiscordChannel _botTestingChannel;
-        private readonly List<int> rankedModes = new List<int>() { 5, 6, 7 };
+        private static readonly List<int> rankedModes = new List<int>() { 5, 6, 7 };
 
         public override async void Run(DiscordClient discord)
         {
@@ -59,13 +59,10 @@ namespace Bot.Implementations
                         string reply = string.Empty;
                         foreach (var player in matchIdToPlayersMapping[matchId])
                         {
-                            string winOrLose = FindPlayerGameResult(player, matchDetails);
-                            string hero = FindHero(player, matchDetails);
-                            string KDA = FindKDA(player, matchDetails);
-                            reply += $"<@{player.DiscordId}> **{winOrLose}** a {normalOrRanked} game.\n**Hero**: {hero}\n**KDA**: {KDA}\n";
+                            reply += GenerateMatchString(matchDetails, normalOrRanked, player);
                         }
-                        string DotabuffLink = $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
-                        await _botTestingChannel.SendMessageAsync($"{reply}{DotabuffLink}");
+                        reply += GenerateDotaBuffLink(matchId);
+                        await _botTestingChannel.SendMessageAsync(reply);
                         Program.Logger.Log($"Match Details logged for match id: {matchId}");
                     }
                 }
@@ -79,31 +76,44 @@ namespace Bot.Implementations
             }
         }
 
-        private string GetNormalOrRankedMatch(dynamic matchDetails)
+        public static string GenerateDotaBuffLink(string matchId)
+        {
+            return $"Dotabuff: {OpenDotaConfiguration.DotabuffMatchUrl}{matchId}";
+        }
+
+        public static string GenerateMatchString(dynamic matchDetails, string normalOrRanked, Player player)
+        {
+            string winOrLose = FindPlayerGameResult(player, matchDetails);
+            string hero = FindHero(player, matchDetails);
+            string KDA = FindKDA(player, matchDetails);
+            return $"<@{player.DiscordId}> **{winOrLose}** a {normalOrRanked} game.\n**Hero**: {hero}\n**KDA**: {KDA}\n";
+        }
+
+        public static string GetNormalOrRankedMatch(dynamic matchDetails)
         {
             if (rankedModes.Contains((int)matchDetails.lobby_type))
                 return "ranked";
             else return "normal";
         }
 
-        public string FindHero(Player player, dynamic matchDetails)
+        public static string FindHero(Player player, dynamic matchDetails)
         {
             dynamic playerMatchInfo = GetPlayerMatchInfo(player, matchDetails);
             return HeroDetails.HeroList.Where(x => x.id == (int)playerMatchInfo.hero_id).First().localized_name;
         }
 
-        private dynamic GetPlayerMatchInfo(Player player, dynamic matchDetails)
+        public static dynamic GetPlayerMatchInfo(Player player, dynamic matchDetails)
         {
             return ((IEnumerable<dynamic>)matchDetails.players).Where(y => y.account_id == player.SteamId).First();
         }
 
-        public string FindKDA(Player player, dynamic matchDetails)
+        public static string FindKDA(Player player, dynamic matchDetails)
         {
             var playerMatchInfo = GetPlayerMatchInfo(player, matchDetails);
             return $"{playerMatchInfo.kills}/{playerMatchInfo.deaths}/{playerMatchInfo.assists}";
         }
 
-        public string FindPlayerGameResult(Player player, dynamic matchDetails)
+        public static string FindPlayerGameResult(Player player, dynamic matchDetails)
         {
             bool radiantWon = matchDetails.radiant_win;
             bool isPlayerRadiant = false;

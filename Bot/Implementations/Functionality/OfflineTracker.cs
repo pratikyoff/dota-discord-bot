@@ -1,5 +1,7 @@
-﻿using Bot.Configuration;
+﻿#pragma warning disable CS4014
+using Bot.Configuration;
 using Bot.Contracts;
+using Bot.Models;
 using Bot.Universal;
 using DSharpPlus;
 using System;
@@ -7,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using static Bot.Implementations.DotaGameTracker;
 
 namespace Bot.Implementations
 {
@@ -16,11 +19,11 @@ namespace Bot.Implementations
         {
             BaseAddress = new Uri(OpenDotaConfiguration.OpenDotaAPIAddress)
         };
-        private Dictionary<string, dynamic> _matchMap = new Dictionary<string, dynamic>();
+        private Dictionary<string, List<Player>> _matchMap = new Dictionary<string, List<Player>>();
 
         public override async void Run(DiscordClient discord)
         {
-            var channel = await discord.GetChannelAsync(BotDetails.BotDumpChannel);
+            var channel = await discord.GetChannelAsync(BotDetails.BotFeedChannel);
             var lastMessage = (await channel.GetMessagesAsync(1)).FirstOrDefault();
             var matchId = Regex.Match(lastMessage.Content, $"[0-9]+$").Value;
             string matchDetailsString = KeyValueCache.Get(matchId);
@@ -35,9 +38,26 @@ namespace Bot.Implementations
             foreach (var player in PlayerConfiguration.Players)
             {
                 var recentMatches = JsonToFrom.FromJson<dynamic>(await NetComm.GetResponseOfURL($"players/{player.SteamId}/matches?date={diffInTime}", _httpClient));
-                foreach (var match in recentMatches)
+                foreach (var recentMatch in recentMatches)
                 {
+                    string recentMatchId = recentMatch.match_id;
+                    if (!_matchMap.ContainsKey(recentMatchId))
+                        _matchMap[recentMatchId] = new List<Player>();
+                    _matchMap[recentMatchId].Add(player);
                 }
+            }
+            foreach (var matchMap in _matchMap)
+            {
+                if (KeyValueCache.Get(matchMap.Key) == null)
+                    KeyValueCache.Put(matchMap.Key, await NetComm.GetResponseOfURL($"matches/{matchMap.Key}", _httpClient));
+                dynamic parsedMatch = JsonToFrom.FromJson<dynamic>(KeyValueCache.Get(matchMap.Key));
+                string matchString = string.Empty;
+                foreach (var player in matchMap.Value)
+                {
+                    matchString += GenerateMatchString(parsedMatch, GetNormalOrRankedMatch(parsedMatch), player);
+                }
+                matchString += GenerateDotaBuffLink(matchMap.Key);
+                channel.SendMessageAsync(matchString);
             }
         }
 
