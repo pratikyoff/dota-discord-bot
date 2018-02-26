@@ -24,16 +24,28 @@ namespace Bot.Implementations
         public override async void Run(DiscordClient discord)
         {
             var channel = await discord.GetChannelAsync(BotDetails.BotFeedChannel);
+
             var lastMessage = (await channel.GetMessagesAsync(1)).FirstOrDefault();
             var matchId = Regex.Match(lastMessage.Content, $"[0-9]+$").Value;
-            string matchDetailsString = KeyValueCache.Get(matchId);
+
+            if (matchId == null || matchId == string.Empty)
+            {
+                do
+                {
+                    var lastNMessage = (await channel.GetMessagesAsync(1, before: lastMessage.Id)).FirstOrDefault();
+                    matchId = Regex.Match(lastNMessage.Content, $"[0-9]+$").Value;
+                    lastMessage = lastNMessage;
+                } while (matchId == null || matchId == string.Empty);
+            }
+
+            var matchDetailsString = KeyValueCache.Get(matchId);
             if (matchDetailsString == null)
             {
                 matchDetailsString = await NetComm.GetResponseOfURL($"matches/{matchId}", _httpClient);
                 KeyValueCache.Put(matchId, matchDetailsString);
             }
             dynamic matchDetails = JsonToFrom.FromJson<dynamic>(matchDetailsString);
-            int matchEndTime = (int)matchDetails.start_time + (int)matchDetails.duration;
+            long matchEndTime = (long)matchDetails.start_time + (long)matchDetails.duration;
             double diffInTime = GetDiffInDays(matchEndTime);
             foreach (var player in PlayerConfiguration.Players)
             {
@@ -61,7 +73,7 @@ namespace Bot.Implementations
             }
         }
 
-        private static double GetDiffInDays(int epochTime)
+        private static double GetDiffInDays(long epochTime)
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             epoch = epoch.AddSeconds(epochTime);
