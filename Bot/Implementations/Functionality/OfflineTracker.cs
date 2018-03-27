@@ -58,7 +58,8 @@ namespace Bot.Implementations
                     _matchMap[recentMatchId].Add(player);
                 }
             }
-            foreach (var matchMap in _matchMap)
+            var _matchMapOrdered = _matchMap.OrderBy(x => x.Key);
+            foreach (var matchMap in _matchMapOrdered)
             {
                 if (KeyValueCache.Get(matchMap.Key) == null)
                     KeyValueCache.Put(matchMap.Key, await NetComm.GetResponseOfURL($"matches/{matchMap.Key}", _httpClient));
@@ -70,6 +71,7 @@ namespace Bot.Implementations
                 }
                 matchString += GenerateDotaBuffLink(matchMap.Key);
                 channel.SendMessageAsync(matchString);
+                Program.Logger.Log($"Offline Tracker logged match {matchMap.Key}.");
             }
         }
 
