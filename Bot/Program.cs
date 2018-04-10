@@ -20,7 +20,7 @@ namespace Bot
         static void Main(string[] args)
         {
             Logger = new ConsoleLogger();
-            DumpLogger = new ConsoleLogger();
+            DumpLogger = new NoLogger();
 
             try
             {
