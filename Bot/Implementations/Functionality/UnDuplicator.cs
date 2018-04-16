@@ -20,7 +20,7 @@ namespace Bot.Implementations
                         try
                         {
                             await x.Message.DeleteAsync();
-                            Program.Logger.Log($"Spam controlled from {x.Author.Username} <{x.Author.Id}>");
+                            Program.Logger.Log($"Spam controlled from {x.Author.Username} <{x.Author.Id}>. Msg - {x.Message.Content}");
                         }
                         catch { }
                     }
