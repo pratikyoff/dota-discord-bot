@@ -99,7 +99,16 @@ namespace Bot.Implementations
         public static string FindHero(Player player, dynamic matchDetails)
         {
             dynamic playerMatchInfo = GetPlayerMatchInfo(player, matchDetails);
-            return HeroDetails.HeroList.Where(x => x.id == (int)playerMatchInfo.hero_id).First().localized_name;
+            string heroName = null;
+            try
+            {
+                heroName = HeroDetails.HeroList.Where(x => x.id == (int)playerMatchInfo.hero_id).First().localized_name;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Hero id not found in list");
+            }
+            return heroName;
         }
 
         public static dynamic GetPlayerMatchInfo(Player player, dynamic matchDetails)
