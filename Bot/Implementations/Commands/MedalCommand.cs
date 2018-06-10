@@ -48,6 +48,10 @@ namespace Bot.Implementations.Commands
             var jsonString = await NetComm.GetResponseOfURL(url, _httpClient);
             var playerInfo = JsonToFrom.FromJson<dynamic>(jsonString);
             string playerMedal = (string)playerInfo.rank_tier;
+            if (string.IsNullOrEmpty(playerMedal))
+            {
+                return $"<@{id}> is uncalibrated.";
+            }
             var actualMedal = (Medal)((int)char.GetNumericValue(playerMedal[0]) - 1);
             var star = (int)char.GetNumericValue(playerMedal[1]);
             return $"<@{id}> is {actualMedal}[{star}].";
