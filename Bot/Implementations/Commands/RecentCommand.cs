@@ -8,8 +8,8 @@ using DSharpPlus.Entities;
 
 namespace Bot.Implementations.Commands
 {
-    [Command("stat")]
-    public class Stat : ICommand
+    [Command("recent")]
+    public class RecentCommand : ICommand
     {
         private readonly double _maxHours = 72;
 
