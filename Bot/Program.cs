@@ -75,7 +75,7 @@ namespace Bot
                     string reply = string.Empty;
                     try
                     {
-                        reply = await CommandConfiguration.Get[command].Process(x.Message);
+                        reply = await CommandConfiguration.Get[command].ProcessAsync(x.Message);
                     }
                     catch { }
                     Logger.Log($"<Message: {x.Message.Content}>\t<Author: {x.Author.Id}>\t<Name: {x.Author.Username}>\t<Reply: {reply}>");

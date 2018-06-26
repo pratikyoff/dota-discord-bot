@@ -7,7 +7,7 @@ namespace Bot.Configuration
     [Command("ping")]
     public class PingCommand : ICommand
     {
-        public Task<string> Process(DiscordMessage message)
+        public Task<string> ProcessAsync(DiscordMessage message)
         {
             return Task.FromResult(Program.Discord.Ping + "ms");
         }

@@ -43,7 +43,7 @@ namespace Bot.Implementations
                             player.TotalMatches = currentMatches;
 
                             var jsonString = await NetComm.GetResponseOfURL($"players/{player.SteamId}/matches?limit=1", _httpClient);
-                            dynamic lastMatch = JsonToFrom.FromJson<dynamic>(jsonString)[0];
+                            dynamic lastMatch = JsonToFrom.Deserialize<dynamic>(jsonString)[0];
                             string matchId = lastMatch.match_id;
                             if (!matchIdToPlayersMapping.ContainsKey(matchId))
                                 matchIdToPlayersMapping[matchId] = new List<Player>();
@@ -54,7 +54,7 @@ namespace Bot.Implementations
                     foreach (var matchId in matchIdToPlayersMapping.Keys)
                     {
                         string matchDetailsString = await NetComm.GetResponseOfURL($"matches/{matchId}", _httpClient);
-                        dynamic matchDetails = JsonToFrom.FromJson<dynamic>(matchDetailsString);
+                        dynamic matchDetails = JsonToFrom.Deserialize<dynamic>(matchDetailsString);
                         string normalOrRanked = GetNormalOrRankedMatch(matchDetails);
                         string reply = string.Empty;
                         foreach (var player in matchIdToPlayersMapping[matchId])
@@ -155,7 +155,7 @@ namespace Bot.Implementations
                 {
                     isError = false;
                     jsonString = await NetComm.GetResponseOfURL($"players/{player.SteamId}/wl", _httpClient);
-                    responseInJson = JsonToFrom.FromJson<dynamic>(jsonString);
+                    responseInJson = JsonToFrom.Deserialize<dynamic>(jsonString);
                     int[] winAndLose = new int[2] { responseInJson.win, responseInJson.lose };
                     return winAndLose;
                 }

@@ -38,7 +38,7 @@ namespace Bot.Implementations
 
         private List<Time> _listOfTimeConfig = new List<Time>() { _second, _minute, _hour, _day };
 
-        public Task<string> Process(DiscordMessage message)
+        public Task<string> ProcessAsync(DiscordMessage message)
         {
             string[] words = message.Content.Split(' ');
             if (words.Length < 3)

@@ -21,7 +21,7 @@ namespace Bot.Implementations
             _voteCommandText = CommandConfiguration.GetCommandText<VoteCommand>();
         }
 
-        public Task<string> Process(DiscordMessage message)
+        public Task<string> ProcessAsync(DiscordMessage message)
         {
             return Task.FromResult(ProcessVote(message));
         }

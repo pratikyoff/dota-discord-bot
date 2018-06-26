@@ -7,7 +7,7 @@ namespace Bot.Implementations
     [Command("clean")]
     public class CleanCommand : ICommand
     {
-        public async Task<string> Process(DiscordMessage message)
+        public async Task<string> ProcessAsync(DiscordMessage message)
         {
             if (!message.Author.Id.ToString().Equals("162522319737061376"))
                 return "Not authorized";

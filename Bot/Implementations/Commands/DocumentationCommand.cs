@@ -18,7 +18,7 @@ namespace Bot.Implementations
             _voteText = CommandConfiguration.GetCommandText<VoteCommand>();
         }
 
-        public Task<string> Process(DiscordMessage message)
+        public Task<string> ProcessAsync(DiscordMessage message)
         {
             string doc = $"Here are a list of commands presently supported.\n" +
             $"1.Ping - `!{_pingText}` command for checking the latency of the bot.\n" +

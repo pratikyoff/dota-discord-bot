@@ -10,7 +10,7 @@ namespace BotFixture
         public void GetImplementationOrAbstractionFixture()
         {
             var list = ReflectiveEnumerator.GetInheritedFromAbstractClass<Functionality>();
-            FileOperations.AppendLine("testing.log", JsonToFrom.ToJson(list));
+            FileOperations.AppendLine("testing.log", JsonToFrom.Serialize(list));
             Assert.True(list.Count > 0);
         }
 

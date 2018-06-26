@@ -53,7 +53,7 @@ namespace Bot.Implementations
             foreach (var player in PlayerConfiguration.Players)
             {
                 var jsonString = await NetComm.GetResponseOfURL($"players/{player.SteamId}/wl?date=1", _httpClient);
-                var responseInJson = JsonToFrom.FromJson<dynamic>(jsonString);
+                var responseInJson = JsonToFrom.Deserialize<dynamic>(jsonString);
                 int wins = responseInJson.win;
                 int losses = responseInJson.lose;
                 if (wins + losses > 0)

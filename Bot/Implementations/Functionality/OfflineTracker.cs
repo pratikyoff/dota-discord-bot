@@ -44,12 +44,12 @@ namespace Bot.Implementations
                 matchDetailsString = await NetComm.GetResponseOfURL($"matches/{matchId}", _httpClient);
                 KeyValueCache.Put(matchId, matchDetailsString);
             }
-            dynamic matchDetails = JsonToFrom.FromJson<dynamic>(matchDetailsString);
+            dynamic matchDetails = JsonToFrom.Deserialize<dynamic>(matchDetailsString);
             long matchEndTime = (long)matchDetails.start_time + (long)matchDetails.duration;
             double diffInTime = GetDiffInDays(matchEndTime);
             foreach (var player in PlayerConfiguration.Players)
             {
-                var recentMatches = JsonToFrom.FromJson<dynamic>(await NetComm.GetResponseOfURL($"players/{player.SteamId}/matches?date={diffInTime}", _httpClient));
+                var recentMatches = JsonToFrom.Deserialize<dynamic>(await NetComm.GetResponseOfURL($"players/{player.SteamId}/matches?date={diffInTime}", _httpClient));
                 foreach (var recentMatch in recentMatches)
                 {
                     string recentMatchId = recentMatch.match_id;
@@ -63,7 +63,7 @@ namespace Bot.Implementations
             {
                 if (KeyValueCache.Get(matchMap.Key) == null)
                     KeyValueCache.Put(matchMap.Key, await NetComm.GetResponseOfURL($"matches/{matchMap.Key}", _httpClient));
-                dynamic parsedMatch = JsonToFrom.FromJson<dynamic>(KeyValueCache.Get(matchMap.Key));
+                dynamic parsedMatch = JsonToFrom.Deserialize<dynamic>(KeyValueCache.Get(matchMap.Key));
                 string matchString = string.Empty;
                 foreach (var player in matchMap.Value)
                 {

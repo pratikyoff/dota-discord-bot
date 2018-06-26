@@ -29,7 +29,7 @@ namespace Bot.Implementations
             _expletiveCommandText = CommandConfiguration.GetCommandText<ExpletiveCommand>();
         }
 
-        public async Task<string> Process(DiscordMessage message)
+        public async Task<string> ProcessAsync(DiscordMessage message)
         {
             if (_expletiveCommandText.Length + 2 > message.Content.Length)
                 return "Are you stupid?";

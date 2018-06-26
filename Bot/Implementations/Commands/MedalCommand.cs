@@ -22,7 +22,7 @@ namespace Bot.Implementations.Commands
 
         private HttpClient _httpClient;
 
-        public async Task<string> Process(DiscordMessage message)
+        public async Task<string> ProcessAsync(DiscordMessage message)
         {
             var words = message.Content.Split(' ');
             string toReturn = string.Empty;
@@ -46,7 +46,7 @@ namespace Bot.Implementations.Commands
             string steamId = PlayerConfiguration.Players.Where(x => x.DiscordId.Equals(id.ToString())).FirstOrDefault().SteamId;
             var url = $"players/{steamId}";
             var jsonString = await NetComm.GetResponseOfURL(url, _httpClient);
-            var playerInfo = JsonToFrom.FromJson<dynamic>(jsonString);
+            var playerInfo = JsonToFrom.Deserialize<dynamic>(jsonString);
             string playerMedal = (string)playerInfo.rank_tier;
             if (string.IsNullOrEmpty(playerMedal))
             {

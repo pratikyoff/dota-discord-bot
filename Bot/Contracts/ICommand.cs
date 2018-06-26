@@ -5,6 +5,6 @@ namespace Bot.Contracts
 {
     public interface ICommand
     {
-        Task<string> Process(DiscordMessage message);
+        Task<string> ProcessAsync(DiscordMessage message);
     }
 }
