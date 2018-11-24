@@ -13,6 +13,7 @@ namespace BotFixture
             ICrypter crypter = new Crypter();
             var encrypted = crypter.Encrypt(example);
             Assert.NotEqual(encrypted, example);
+            Assert.Equal("ifmmp", encrypted);
             var decrypted = crypter.Decrypt(encrypted);
             Assert.Equal(example, decrypted);
         }
