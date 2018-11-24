@@ -13,16 +13,14 @@ namespace BotFixture
         [Fact]
         public void FindHeroFixture()
         {
-            DotaGameTracker dotaGameTracker = new DotaGameTracker();
-            string hero = dotaGameTracker.FindHero(_player, _exampleMatchDetails);
+            string hero = DotaGameTracker.FindHero(_player, _exampleMatchDetails);
             Assert.Equal("Shadow Fiend", hero);
         }
 
         [Fact]
         public void FindKDAFixture()
         {
-            DotaGameTracker dotaGameTracker = new DotaGameTracker();
-            string KDA = dotaGameTracker.FindKDA(_player, _exampleMatchDetails);
+            string KDA = DotaGameTracker.FindKDA(_player, _exampleMatchDetails);
             Assert.Equal("15/1/8", KDA);
         }
     }
