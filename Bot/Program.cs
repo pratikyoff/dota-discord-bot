@@ -28,7 +28,7 @@ namespace Bot
             }
             catch (Exception e)
             {
-                DumpLogger.Log($"Exception:{e.Message}\n{e.StackTrace}");
+                Logger.Log($"Exception:{e.Message}\n{e.StackTrace}");
             }
 
             foreach (var functionality in FunctionalityConfiguration.Functionalities)
